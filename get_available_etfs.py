@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 import pandas as pd
-import numpy as np
 from urllib.parse import quote
 from datetime import datetime
 from playwright.sync_api import sync_playwright
@@ -94,7 +93,7 @@ class GetAvailableEtfs:
                 'Gross Expense Ratio': ter,
                 'NAV': nav,
                 'AUM': aum,
-                'As of Date': as_of_date
+                'Date': as_of_date
             })
 
         df_url_list = pd.DataFrame(etf_data)
@@ -109,5 +108,5 @@ if __name__ == "__main__":
     content = get.fetch_url_content(url_edit)
 
     df = get.parse_etf_table(content)
-    print(f"\nTotal ETFs found: {len(df)}")
     print(df.to_string())
+    print(f"\nTotal ETFs found: {len(df)}")
