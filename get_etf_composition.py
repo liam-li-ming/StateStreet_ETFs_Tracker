@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class GetEtfCompositions:
+class GetEtfComposition:
 
     def __init__(self):
         
@@ -102,7 +102,7 @@ class GetEtfCompositions:
             return None
 
 if __name__ == "__main__":
-    get = GetEtfCompositions()
+    get = GetEtfComposition()
 
     etf_ticker = "spy"  # Example ETF ticker
     print("Fetching ETF composition for:", etf_ticker)
