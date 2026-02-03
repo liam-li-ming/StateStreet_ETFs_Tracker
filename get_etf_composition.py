@@ -14,7 +14,6 @@ class GetEtfComposition:
         :param etf_ticker: ETF ticker symbol
         :return: DataFrame with ETF composition data
         """
-
         etf_excel = f"holdings-daily-us-en-{etf_ticker.lower()}.xlsx"
         etf_url = self.base_url + etf_excel
         print(etf_url)
@@ -111,5 +110,14 @@ if __name__ == "__main__":
     
     print(f"ETF Composition for {etf_ticker}:\n")
 
-    print(df.to_string())
+    # Save to CSV to verify all data is captured
+    # output_file = f"{etf_ticker}_composition.csv"
+    # df.to_csv(output_file, index=False)
+    # print(f"Saved full composition to: {output_file}")
+
+    # Display first and last few rows
+    print("\nFirst 5 rows:")
+    print(df.head().to_string())
+    print("\nLast 5 rows:")
+    print(df.tail().to_string())
     print(f"\nTotal components found: {len(df)}")
