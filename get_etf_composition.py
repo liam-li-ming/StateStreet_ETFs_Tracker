@@ -103,7 +103,7 @@ class GetEtfComposition:
 if __name__ == "__main__":
     get = GetEtfComposition()
 
-    etf_ticker = "spy"  # Example ETF ticker
+    etf_ticker = "XLFI"  # Example ETF ticker
     print("Fetching ETF composition for:", etf_ticker)
     print("running the function")
     df = get.fetch_etf_composition_to_df(etf_ticker)

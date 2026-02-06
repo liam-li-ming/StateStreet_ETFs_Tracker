@@ -1,6 +1,7 @@
 import sqlite3
 import pandas as pd
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from get_available_etfs import GetAvailableEtfs
 from get_etf_composition import GetEtfComposition
 
@@ -24,9 +25,11 @@ class EquityEtfCompositionDb:
         self.conn = None
 
     def connect_db(self):
-        """Establish database connection."""
+        """Establish database connection with performance optimizations."""
         self.conn = sqlite3.connect(self.db_path)
         self.conn.row_factory = sqlite3.Row
+        self.conn.execute("PRAGMA journal_mode=WAL")
+        self.conn.execute("PRAGMA synchronous=NORMAL")
         return self.conn
 
     def close_db(self):
@@ -56,7 +59,7 @@ class EquityEtfCompositionDb:
         # Using composite unique constraint to prevent duplicate entries
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS equity_etf_compositions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY,
                 etf_ticker TEXT NOT NULL,
                 composition_date TEXT NOT NULL,
                 component_name TEXT,
@@ -93,40 +96,37 @@ class EquityEtfCompositionDb:
 
     def update_etf_info(self, etf_df):
         """
-        Insert or update ETF metadata from get_available_etfs result.
+        Insert or update ETF metadata from get_available_etfs result using batch upsert.
 
         :param etf_df: DataFrame from GetAvailableEtfs.parse_etf_table()
         """
         cursor = self.conn.cursor()
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        for _, row in etf_df.iterrows():
-            cursor.execute("""
-                INSERT INTO equity_etf_info (ticker, name, domicile, gross_expense_ratio, nav, aum, last_updated)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(ticker) DO UPDATE SET
-                    name = excluded.name,
-                    domicile = excluded.domicile,
-                    gross_expense_ratio = excluded.gross_expense_ratio,
-                    nav = excluded.nav,
-                    aum = excluded.aum,
-                    last_updated = excluded.last_updated
-            """, (
-                row['Ticker'],
-                row['Name'],
-                row['Domicile'],
-                row['Gross Expense Ratio'],
-                row['NAV'],
-                row['AUM'],
-                now
-            ))
+        records = [
+            (row['Ticker'], row['Name'], row['Domicile'],
+             row['Gross Expense Ratio'], row['NAV'], row['AUM'], now)
+            for _, row in etf_df.iterrows()
+        ]
+
+        cursor.executemany("""
+            INSERT INTO equity_etf_info (ticker, name, domicile, gross_expense_ratio, nav, aum, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(ticker) DO UPDATE SET
+                name = excluded.name,
+                domicile = excluded.domicile,
+                gross_expense_ratio = excluded.gross_expense_ratio,
+                nav = excluded.nav,
+                aum = excluded.aum,
+                last_updated = excluded.last_updated
+        """, records)
 
         self.conn.commit()
         print(f"Upserted {len(etf_df)} ETF info records.")
 
     def insert_composition(self, composition_df):
         """
-        Insert ETF composition data. Skips duplicates based on unique constraint.
+        Insert ETF composition data using batch insert. Skips duplicates via INSERT OR IGNORE.
 
         :param composition_df: DataFrame from GetEtfComposition.fetch_etf_composition_to_df()
         :return: Number of records inserted
@@ -135,42 +135,31 @@ class EquityEtfCompositionDb:
             return 0
 
         cursor = self.conn.cursor()
-        inserted = 0
+        records = [
+            (row.get('etf_ticker'), row.get('composition_date'), row.get('component_name'),
+             row.get('ticker'), row.get('identifier'), row.get('sedol'),
+             row.get('weight'), row.get('sector'), row.get('shares'), row.get('currency'))
+            for _, row in composition_df.iterrows()
+        ]
 
-        for _, row in composition_df.iterrows():
-            try:
-                cursor.execute("""
-                    INSERT INTO equity_etf_compositions (
-                        etf_ticker, composition_date, component_name, component_ticker,
-                        component_identifier, component_sedol, component_weight, component_sector, component_shares, component_currency
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    row.get('etf_ticker'),
-                    row.get('composition_date'),
-                    row.get('component_name'),
-                    row.get('ticker'),
-                    row.get('identifier'),
-                    row.get('sedol'),
-                    row.get('weight'),
-                    row.get('sector'),
-                    row.get('shares'),
-                    row.get('currency')
-                ))
-                inserted += 1
-            except sqlite3.IntegrityError:
-                # Duplicate entry, skip
-                pass
+        cursor.executemany("""
+            INSERT OR IGNORE INTO equity_etf_compositions (
+                etf_ticker, composition_date, component_name, component_ticker,
+                component_identifier, component_sedol, component_weight,
+                component_sector, component_shares, component_currency
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, records)
 
         self.conn.commit()
-        return inserted
+        return cursor.rowcount
 
     def get_available_tickers(self):
-        """Get list of all ETF tickers from equity_etf_info table."""
+        """Get list of all ETF tickers from equity_etf_info table 1."""
         cursor = self.conn.cursor()
         cursor.execute("SELECT ticker FROM equity_etf_info ORDER BY ticker")
         return [row['ticker'] for row in cursor.fetchall()]
 
-    def get_composition_dates(self, etf_ticker=None):
+    def get_composition_dates(self, etf_ticker = None):
         """Get distinct composition dates, optionally filtered by ETF ticker."""
         cursor = self.conn.cursor()
         if etf_ticker:
@@ -187,7 +176,7 @@ class EquityEtfCompositionDb:
 
     def get_composition(self, etf_ticker, composition_date):
         """
-        Get composition for a specific ETF on a specific date.
+        Get composition for a specific ETF on a specific date from table 2.
 
         :return: DataFrame with composition data
         """
@@ -233,8 +222,29 @@ class EquityEtfCompositionDb:
             'total_unique_dates': date_count
         }
 
+    def purge_old_compositions(self, days_to_keep=365):
+        """
+        Delete composition records older than the retention period and reclaim disk space.
 
-def fetch_and_store_all_etfs(db, asset_classes=None, skip_existing=True):
+        :param days_to_keep: Number of days of history to retain (default: 365)
+        :return: Number of records deleted
+        """
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            DELETE FROM equity_etf_compositions
+            WHERE composition_date < date('now', ? || ' days')
+        """, (f'-{days_to_keep}',))
+        deleted = cursor.rowcount
+        self.conn.commit()
+        if deleted > 0:
+            self.conn.execute("VACUUM")
+            print(f"Purged {deleted} records older than {days_to_keep} days and reclaimed disk space.")
+        else:
+            print(f"No records older than {days_to_keep} days found.")
+        return deleted
+
+
+def fetch_and_store_all_etfs(db, asset_classes = None, skip_existing = True):
     """
     Fetch all ETF compositions and store them in the database.
 
@@ -246,7 +256,6 @@ def fetch_and_store_all_etfs(db, asset_classes=None, skip_existing=True):
         asset_classes = ["equity"]
 
     get_etfs = GetAvailableEtfs()
-    get_composition = GetEtfComposition()
 
     all_etf_df = pd.DataFrame()
 
@@ -275,39 +284,53 @@ def fetch_and_store_all_etfs(db, asset_classes=None, skip_existing=True):
     # Update ETF info table
     db.update_etf_info(all_etf_df)
 
-    # Fetch and store compositions for each ETF
+    # Fetch compositions concurrently, then store to DB from main thread
     success_count = 0
     skip_count = 0
     fail_count = 0
+    total = len(all_etf_df)
+    tickers = all_etf_df['Ticker'].tolist()
 
-    for idx, row in all_etf_df.iterrows():
-        ticker = row['Ticker']
-        print(f"\n[{idx + 1}/{len(all_etf_df)}] Processing {ticker}...")
+    def fetch_composition(ticker):
+        """Fetch a single ETF composition (thread-safe, no DB access)."""
+        comp = GetEtfComposition()
+        return ticker, comp.fetch_etf_composition_to_df(ticker)
 
-        try:
-            # Fetch composition
-            composition_df = get_composition.fetch_etf_composition_to_df(ticker)
+    print(f"\nFetching compositions concurrently with up to 100 workers...")
 
-            if composition_df is not None and not composition_df.empty:
-                composition_date = composition_df['composition_date'].iloc[0]
+    with ThreadPoolExecutor(max_workers = 500) as executor:
+        future_to_ticker = {
+            executor.submit(fetch_composition, ticker): ticker
+            for ticker in tickers
+        }
 
-                # Check if we should skip
-                if skip_existing and db.composition_exists(ticker, composition_date):
-                    print(f"  Skipping {ticker} - composition for {composition_date} already exists")
-                    skip_count += 1
-                    continue
+        for idx, future in enumerate(as_completed(future_to_ticker), 1):
+            ticker = future_to_ticker[future]
+            print(f"\n[{idx}/{total}] Processing {ticker}...")
 
-                # Insert composition
-                inserted = db.insert_composition(composition_df)
-                print(f"  Stored {inserted} holdings for {ticker} (date: {composition_date})")
-                success_count += 1
-            else:
-                print(f"  No composition data available for {ticker}")
+            try:
+                ticker, composition_df = future.result()
+
+                if composition_df is not None and not composition_df.empty:
+                    composition_date = composition_df['composition_date'].iloc[0]
+
+                    # Check if we should skip
+                    if skip_existing and db.composition_exists(ticker, composition_date):
+                        print(f"  Skipping {ticker} - composition for {composition_date} already exists")
+                        skip_count += 1
+                        continue
+
+                    # Insert composition (main thread - SQLite safe)
+                    inserted = db.insert_composition(composition_df)
+                    print(f"  Stored {inserted} holdings for {ticker} (date: {composition_date})")
+                    success_count += 1
+                else:
+                    print(f"  No composition data available for {ticker}")
+                    fail_count += 1
+
+            except Exception as e:
+                print(f"  Error processing {ticker}: {e}")
                 fail_count += 1
-
-        except Exception as e:
-            print(f"  Error processing {ticker}: {e}")
-            fail_count += 1
 
     print(f"\n{'='*60}")
     print("Summary:")
@@ -315,33 +338,3 @@ def fetch_and_store_all_etfs(db, asset_classes=None, skip_existing=True):
     print(f"  Skipped (existing): {skip_count}")
     print(f"  Failed: {fail_count}")
     print(f"{'='*60}")
-
-
-# def main():
-#     """Main function to run the ETF composition storage."""
-#     db = EquityEtfCompositionDb(db_path="data/etf_compositions.db")
-
-#     try:
-#         db.connect_db()
-#         db.create_tables()
-
-#         # Fetch and store all equity ETFs (you can add more asset classes)
-#         fetch_and_store_all_etfs(
-#             db,
-#             asset_classes=["equity"],  # Options: "alternative", "equity", "fixed-income", "Multi-Asset"
-#             skip_existing=True  # Set to False to re-fetch existing compositions
-#         )
-
-#         # Print database stats
-#         stats = db.get_stats()
-#         print(f"\nDatabase Statistics:")
-#         print(f"  Total ETFs tracked: {stats['total_etfs']}")
-#         print(f"  Total composition records: {stats['total_composition_records']}")
-#         print(f"  Unique composition dates: {stats['total_unique_dates']}")
-
-#     finally:
-#         db.close_db()
-
-
-if __name__ == "__main__":
-    main()
