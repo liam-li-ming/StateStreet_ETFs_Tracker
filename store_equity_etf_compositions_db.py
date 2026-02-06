@@ -61,6 +61,9 @@ class EquityEtfCompositionDb:
             CREATE TABLE IF NOT EXISTS equity_etf_compositions (
                 id INTEGER PRIMARY KEY,
                 etf_ticker TEXT NOT NULL,
+                nav REAL,
+                shares_outstanding REAL,
+                total_net_assets REAL,
                 composition_date TEXT NOT NULL,
                 component_name TEXT,
                 component_ticker TEXT,
@@ -136,7 +139,8 @@ class EquityEtfCompositionDb:
 
         cursor = self.conn.cursor()
         records = [
-            (row.get('etf_ticker'), row.get('composition_date'), row.get('component_name'),
+            (row.get('etf_ticker'), row.get('nav'), row.get('shares_outstanding'),
+             row.get('total_net_assets'), row.get('composition_date'), row.get('component_name'),
              row.get('ticker'), row.get('identifier'), row.get('sedol'),
              row.get('weight'), row.get('sector'), row.get('shares'), row.get('currency'))
             for _, row in composition_df.iterrows()
@@ -144,10 +148,11 @@ class EquityEtfCompositionDb:
 
         cursor.executemany("""
             INSERT OR IGNORE INTO equity_etf_compositions (
-                etf_ticker, composition_date, component_name, component_ticker,
+                etf_ticker, nav, shares_outstanding, total_net_assets,
+                composition_date, component_name, component_ticker,
                 component_identifier, component_sedol, component_weight,
                 component_sector, component_shares, component_currency
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, records)
 
         self.conn.commit()
@@ -222,7 +227,7 @@ class EquityEtfCompositionDb:
             'total_unique_dates': date_count
         }
 
-    def purge_old_compositions(self, days_to_keep=365):
+    def purge_old_compositions(self, days_to_keep = 1825):
         """
         Delete composition records older than the retention period and reclaim disk space.
 
@@ -290,13 +295,14 @@ def fetch_and_store_all_etfs(db, asset_classes = None, skip_existing = True):
     fail_count = 0
     total = len(all_etf_df)
     tickers = all_etf_df['Ticker'].tolist()
+    failed_tickers = []
 
     def fetch_composition(ticker):
         """Fetch a single ETF composition (thread-safe, no DB access)."""
         comp = GetEtfComposition()
         return ticker, comp.fetch_etf_composition_to_df(ticker)
 
-    print(f"\nFetching compositions concurrently with up to 100 workers...")
+    print(f"\nFetching compositions concurrently with up to 500 workers...")
 
     with ThreadPoolExecutor(max_workers = 500) as executor:
         future_to_ticker = {
@@ -325,11 +331,13 @@ def fetch_and_store_all_etfs(db, asset_classes = None, skip_existing = True):
                     print(f"  Stored {inserted} holdings for {ticker} (date: {composition_date})")
                     success_count += 1
                 else:
-                    print(f"  No composition data available for {ticker}")
+                    print(f"  No composition data available for {ticker} (returned None — likely NAV date mismatch or fetch error)")
+                    failed_tickers.append(ticker)
                     fail_count += 1
 
             except Exception as e:
                 print(f"  Error processing {ticker}: {e}")
+                failed_tickers.append(ticker)
                 fail_count += 1
 
     print(f"\n{'='*60}")
@@ -337,4 +345,6 @@ def fetch_and_store_all_etfs(db, asset_classes = None, skip_existing = True):
     print(f"  Successfully stored: {success_count}")
     print(f"  Skipped (existing): {skip_count}")
     print(f"  Failed: {fail_count}")
+    if failed_tickers:
+        print(f"  Failed tickers: {', '.join(failed_tickers)}")
     print(f"{'='*60}")
