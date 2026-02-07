@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sqlite3:*)",
+      "Bash(ls:*)",
+      "Bash(python -m venv:*)",
+      "Bash(\"d:\\\\Adam_github\\\\StateStreet_ETFs_Tracker\\\\venv\\\\Scripts\\\\pip.exe\" install:*)",
+      "Bash(\"d:\\\\Adam_github\\\\StateStreet_ETFs_Tracker\\\\venv\\\\Scripts\\\\python.exe\" -c:*)"
+    ]
+  }
+}
