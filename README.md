@@ -81,7 +81,6 @@ StateStreet_ETFs_Tracker/
 |-- requirements.txt                     # Python dependencies
 |-- data/
 |   +-- etf_compositions.db             # SQLite database (created on first run)
-+-- venv/                                # Virtual environment
 ```
 
 ## Database Schema
@@ -194,18 +193,44 @@ Premium/Discount % = (market_price - fair_nav) / fair_nav x 100
 
 ## Setup
 
+### 1. Create a Conda Environment
+
 ```bash
-# Create virtual environment
-python -m venv venv
+# Create a new conda environment with Python 3.11
+conda create -n etf_tracker python=3.11 -y
 
-# Activate (Windows)
-venv\Scripts\activate
+# Activate the environment
+conda activate etf_tracker
+```
 
-# Install dependencies
-pip install playwright yfinance pandas beautifulsoup4
+### 2. Install Dependencies
 
-# Install Chromium for Playwright
+```bash
+# Install Python packages
+pip install -r requirements.txt
+
+# Install Chromium browser for Playwright (required for web scraping)
 playwright install chromium
+```
+
+### 3. Run the Project
+
+```bash
+# Step 1: Fetch and store all ETF compositions into the database
+python main.py
+
+# Step 2: Detect arbitrage opportunities using live prices
+python detect_etf_arbitrage.py
+```
+
+### Deactivate / Remove Environment
+
+```bash
+# Deactivate when done
+conda deactivate
+
+# Remove the environment entirely (optional)
+conda remove -n etf_tracker --all -y
 ```
 
 ## Usage
