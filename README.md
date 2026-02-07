@@ -272,3 +272,7 @@ finally:
 - yfinance provides delayed/closing prices, not real-time
 - Some components cannot be priced: cash positions, futures contracts, and ticker format mismatches (coverage is typically 99%+ for large equity ETFs)
 - Non-USD denominated holdings in international ETFs may have lower pricing coverage
+
+## Acknowledgements
+
+This project was built with the support of [Claude](https://claude.ai) by Anthropic.
