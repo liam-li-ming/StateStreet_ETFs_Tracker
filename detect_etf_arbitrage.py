@@ -7,9 +7,16 @@ from store_equity_etf_compositions_db import EquityEtfCompositionDb
 class DetectEtfArbitrage:
     """
     Detects ETF arbitrage opportunities by comparing the ETF market price
-    to a calculated fair NAV derived from component holdings and live prices.
+    to a calculated fair NAV derived from component holdings, cash positions,
+    and live prices.
 
-    Fair NAV = SUM(component_shares * current_price) / shares_outstanding
+    Fair NAV = (Stock Value + Cash Value) / Shares Outstanding
+      where Stock Value = SUM(stock_shares_i * stock_price_i)
+            Cash Value  = SUM(cash_amount_j * fx_rate_j)
+
+    Arbitrage Strategy (creation/redemption mechanism):
+      PREMIUM  -> Sell ETF / Buy basket (APs create new ETF shares)
+      DISCOUNT -> Buy ETF / Sell basket (APs redeem ETF shares)
 
     Usage:
         db = EquityEtfCompositionDb()
@@ -19,9 +26,109 @@ class DetectEtfArbitrage:
         db.close_db()
     """
 
+    # Map component_name keywords to yfinance FX ticker (currency -> USD)
+    CURRENCY_TO_FX = {
+        "US DOLLAR": None,                        # $1.00 per unit
+        "U.S. DOLLAR": None,
+        "SSI US GOV MONEY MARKET CLASS": None,    # $1.00 per share
+        "EURO CURRENCY": "EURUSD=X",
+        "POUND STERLING": "GBPUSD=X",
+        "JAPANESE YEN": "JPYUSD=X",
+        "CANADIAN DOLLAR": "CADUSD=X",
+        "AUSTRALIAN DOLLAR": "AUDUSD=X",
+        "HONG KONG DOLLAR": "HKDUSD=X",
+        "SWISS FRANC": "CHFUSD=X",
+        "SWEDISH KRONA": "SEKUSD=X",
+        "NORWEGIAN KRONE": "NOKUSD=X",
+        "DANISH KRONE": "DKKUSD=X",
+        "NEW ZEALAND DOLLAR": "NZDUSD=X",
+        "SINGAPORE DOLLAR": "SGDUSD=X",
+        "SOUTH KOREAN WON": "KRWUSD=X",
+        "NEW TAIWAN DOLLAR": "TWDUSD=X",
+        "BRAZILIAN REAL": "BRLUSD=X",
+        "MEXICAN PESO (NEW)": "MXNUSD=X",
+        "INDIAN RUPEE": "INRUSD=X",
+        "SOUTH AFRICAN RAND": "ZARUSD=X",
+        "INDONESIAN RUPIAH": "IDRUSD=X",
+        "MALAYSIAN RINGGIT": "MYRUSD=X",
+        "PHILIPPINE PESO": "PHPUSD=X",
+        "THAI BAHT": "THBUSD=X",
+        "POLISH ZLOTY": "PLNUSD=X",
+        "TURKISH LIRA": "TRYUSD=X",
+        "CHILEAN PESO": "CLPUSD=X",
+        "COLOMBIAN PESO": "COPUSD=X",
+        "NEW ISRAELI SHEQEL": "ILSUSD=X",
+        "KUWAITI DINAR": "KWDUSD=X",
+        "QATARI RIAL": "QARUSD=X",
+        "SAUDI RIYAL": "SARUSD=X",
+        "CHINESE YUAN": "CNYUSD=X",
+    }
+
+    # Additional keywords for partial matching of cash-like components
+    CASH_PARTIAL_KEYWORDS = [
+        "CASH COLLATERAL",
+        "MARGIN CASH",
+        "MONEY MARKET",
+        "TREASURY BILL",
+        "T-BILL",
+    ]
+
     def __init__(self, db):
         self.db = db
         self.price_cache = {}
+        self.fx_cache = {}
+
+    def _is_cash_component(self, component_name):
+        """Check if a component is a cash/currency/money market position."""
+        name_upper = str(component_name).strip().upper()
+        # Exact match against known currency names
+        if name_upper in self.CURRENCY_TO_FX:
+            return True
+        # Partial match against cash-like keywords
+        for keyword in self.CASH_PARTIAL_KEYWORDS:
+            if keyword in name_upper:
+                return True
+        return False
+
+    def _get_cash_usd_value(self, component_name):
+        """
+        Get the USD value per unit of a cash component.
+        Returns the USD exchange rate, or None if not a recognized cash component.
+
+        For exact-match currency names, uses the corresponding FX ticker.
+        For partial-match cash keywords (e.g. CASH COLLATERAL, MONEY MARKET),
+        assumes USD-denominated ($1 per unit).
+        """
+        name_upper = str(component_name).strip().upper()
+
+        # Check exact match first
+        if name_upper in self.CURRENCY_TO_FX:
+            fx_ticker = self.CURRENCY_TO_FX[name_upper]
+            if fx_ticker is None:
+                return 1.0
+            return self._fetch_fx_rate(fx_ticker)
+
+        # Check partial-match cash keywords (assume USD-denominated)
+        for keyword in self.CASH_PARTIAL_KEYWORDS:
+            if keyword in name_upper:
+                return 1.0
+
+        return None
+
+    def _fetch_fx_rate(self, fx_ticker):
+        """Fetch an FX rate from cache or yfinance."""
+        if fx_ticker in self.fx_cache:
+            return self.fx_cache[fx_ticker]
+        try:
+            data = yf.download(fx_ticker, period="1d", progress=False, auto_adjust=True)
+            if not data.empty:
+                rate = float(data['Close'].iloc[-1].iloc[0])
+                self.fx_cache[fx_ticker] = rate
+                return rate
+        except Exception:
+            pass
+        self.fx_cache[fx_ticker] = None
+        return None
 
     def fetch_prices(self, tickers):
         """
@@ -50,13 +157,14 @@ class DetectEtfArbitrage:
                     tickers_to_fetch,
                     period="1d",
                     progress=False,
-                    threads=True
+                    threads=True,
+                    auto_adjust=True
                 )
 
                 if len(tickers_to_fetch) == 1:
                     t = tickers_to_fetch[0]
                     if not data.empty:
-                        self.price_cache[t] = float(data['Close'].iloc[-1])
+                        self.price_cache[t] = float(data['Close'].iloc[-1].iloc[0])
                     else:
                         self.price_cache[t] = None
                 else:
@@ -100,42 +208,73 @@ class DetectEtfArbitrage:
             print(f"  Invalid shares_outstanding for {etf_ticker}")
             return None
 
-        # Separate priceable vs non-priceable components
-        valid_mask = (
-            composition_df['component_ticker'].notna()
-            & (composition_df['component_ticker'].str.strip() != '')
-            & (composition_df['component_ticker'].str.upper() != 'NAN')
-        )
-        priceable_df = composition_df[valid_mask].copy()
-        non_priceable_df = composition_df[~valid_mask].copy()
-
+        # Classify each component: cash, stock, or unpriceable
+        cash_rows = []
+        stock_rows = []
         skipped = []
-        for _, row in non_priceable_df.iterrows():
-            skipped.append({
-                "name": row['component_name'],
-                "ticker": str(row['component_ticker']),
-                "weight": row['component_weight'],
-                "reason": "no_ticker"
-            })
 
-        # Fetch prices for components + the ETF itself
-        tickers_needed = priceable_df['component_ticker'].str.strip().str.upper().str.replace(".", "-", regex=False).unique().tolist()
-        tickers_needed.append(etf_ticker.upper())
-        prices = self.fetch_prices(tickers_needed)
+        for _, row in composition_df.iterrows():
+            name = row['component_name']
+            ticker_val = row['component_ticker']
 
-        # Calculate portfolio value from component shares * current price
+            if self._is_cash_component(name):
+                cash_rows.append(row)
+            elif pd.notna(ticker_val) and str(ticker_val).strip() not in ('', 'nan', 'NAN'):
+                stock_rows.append(row)
+            else:
+                skipped.append({
+                    "name": name,
+                    "ticker": str(ticker_val),
+                    "weight": row['component_weight'],
+                    "reason": "no_ticker"
+                })
+
+        # Calculate portfolio value
         total_value = 0.0
         total_weight_priced = 0.0
         total_weight_all = composition_df['component_weight'].sum()
+        cash_value = 0.0
+        stock_value = 0.0
 
-        for _, row in priceable_df.iterrows():
-            ticker = row['component_ticker'].strip().upper().replace(".", "-")
+        # Price cash components (USD = $1, foreign = FX rate)
+        for row in cash_rows:
+            shares = row['component_shares']
+            weight = row['component_weight']
+            usd_rate = self._get_cash_usd_value(row['component_name'])
+
+            if usd_rate is not None and not pd.isna(shares):
+                value = shares * usd_rate
+                total_value += value
+                cash_value += value
+                total_weight_priced += weight
+            else:
+                skipped.append({
+                    "name": row['component_name'],
+                    "ticker": "-",
+                    "weight": weight,
+                    "reason": "fx_rate_not_found"
+                })
+
+        # Fetch stock prices + ETF market price
+        stock_df = pd.DataFrame(stock_rows) if stock_rows else pd.DataFrame()
+        if not stock_df.empty:
+            tickers_needed = stock_df['component_ticker'].str.strip().str.upper().str.replace(".", "-", regex=False).unique().tolist()
+        else:
+            tickers_needed = []
+        tickers_needed.append(etf_ticker.upper())
+        prices = self.fetch_prices(tickers_needed)
+
+        # Price stock components
+        for row in stock_rows:
+            ticker = str(row['component_ticker']).strip().upper().replace(".", "-")
             shares = row['component_shares']
             weight = row['component_weight']
             price = prices.get(ticker)
 
             if price is not None and not pd.isna(shares):
-                total_value += shares * price
+                value = shares * price
+                total_value += value
+                stock_value += value
                 total_weight_priced += weight
             else:
                 skipped.append({
@@ -161,13 +300,21 @@ class DetectEtfArbitrage:
         if reported_nav and not pd.isna(reported_nav) and reported_nav > 0:
             premium_discount_vs_reported = ((market_price - reported_nav) / reported_nav) * 100
 
-        # Signal classification
+        # Signal classification and arbitrage strategy
+        # ETF arbitrage works through the creation/redemption mechanism:
+        #   PREMIUM  -> APs buy the underlying basket, create ETF shares, sell ETF at market
+        #   DISCOUNT -> APs buy ETF at market, redeem for underlying basket, sell components
         if premium_discount_pct > 0.1:
             signal = "PREMIUM"
+            arbitrage_action = "SELL ETF / BUY BASKET (creation arbitrage)"
         elif premium_discount_pct < -0.1:
             signal = "DISCOUNT"
+            arbitrage_action = "BUY ETF / SELL BASKET (redemption arbitrage)"
         else:
             signal = "FAIR"
+            arbitrage_action = "NO ACTION"
+
+        estimated_profit_per_share = round(abs(market_price - calculated_nav), 4)
 
         coverage_pct = (total_weight_priced / total_weight_all * 100) if total_weight_all > 0 else 0.0
 
@@ -176,16 +323,23 @@ class DetectEtfArbitrage:
             "analysis_timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             "composition_date": composition_date,
             "total_components": len(composition_df),
-            "priced_components": len(priceable_df) - len([s for s in skipped if s["reason"] == "price_not_found"]),
+            "priced_components": len(composition_df) - len(skipped),
+            "cash_components": len(cash_rows),
+            "stock_components": len(stock_rows),
             "skipped_components": skipped,
             "coverage_pct": round(coverage_pct, 2),
             "shares_outstanding": shares_outstanding,
+            "total_portfolio_value": round(total_value, 2),
+            "stock_value": round(stock_value, 2),
+            "cash_value": round(cash_value, 2),
             "calculated_nav": round(calculated_nav, 4),
             "market_price": round(market_price, 4),
             "reported_nav": reported_nav,
             "premium_discount_pct": round(premium_discount_pct, 4),
             "premium_discount_vs_reported_pct": round(premium_discount_vs_reported, 4) if premium_discount_vs_reported is not None else None,
             "signal": signal,
+            "arbitrage_action": arbitrage_action,
+            "estimated_profit_per_share": estimated_profit_per_share,
         }
 
     def scan_all_etfs(self, threshold_pct=0.5):
@@ -222,6 +376,9 @@ class DetectEtfArbitrage:
             "premium_discount_pct": r["premium_discount_pct"],
             "coverage_pct": r["coverage_pct"],
             "signal": r["signal"],
+            "arbitrage_action": r["arbitrage_action"],
+            "est_profit_per_share": r["estimated_profit_per_share"],
+            "cash_value": r["cash_value"],
             "composition_date": r["composition_date"],
             "priced_components": r["priced_components"],
             "total_components": r["total_components"],
@@ -253,6 +410,7 @@ class DetectEtfArbitrage:
               f"Mkt: ${result['market_price']:.2f} | "
               f"NAV: ${result['calculated_nav']:.2f} | "
               f"Dev: {result['premium_discount_pct']:+.3f}% | "
+              f"Cash: ${result['cash_value']:,.0f} | "
               f"Cov: {result['coverage_pct']:.1f}%")
 
     def format_result(self, result):
@@ -263,8 +421,14 @@ class DetectEtfArbitrage:
             f"{'='*60}",
             f"  Analysis Time:      {result['analysis_timestamp']}",
             f"  Composition Date:   {result['composition_date']}",
-            f"  Components:         {result['priced_components']}/{result['total_components']} priced",
+            f"  Components:         {result['priced_components']}/{result['total_components']} priced "
+            f"({result['stock_components']} stocks, {result['cash_components']} cash)",
             f"  Portfolio Coverage:  {result['coverage_pct']:.2f}%",
+            f"",
+            f"  Portfolio Breakdown:",
+            f"    Stock Value:      ${result['stock_value']:,.2f}",
+            f"    Cash Value:       ${result['cash_value']:,.2f}",
+            f"    Total Value:      ${result['total_portfolio_value']:,.2f}",
             f"",
             f"  Market Price:       ${result['market_price']:.4f}",
             f"  Calculated NAV:     ${result['calculated_nav']:.4f}",
@@ -273,6 +437,8 @@ class DetectEtfArbitrage:
             f"",
             f"  Premium/Discount:   {result['premium_discount_pct']:+.4f}%",
             f"  Signal:             {result['signal']}",
+            f"  Arbitrage Action:   {result['arbitrage_action']}",
+            f"  Est. Profit/Share:  ${result['estimated_profit_per_share']:.4f}",
         ]
         if result['skipped_components']:
             lines.append("")

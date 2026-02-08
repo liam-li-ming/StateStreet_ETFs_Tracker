@@ -1,6 +1,6 @@
 # State Street ETFs Tracker
 
-A data pipeline that scrapes, stores, and analyzes daily holdings for **State Street (SPDR) equity ETFs**. It builds a local SQLite database of ETF compositions and uses live stock prices to detect arbitrage opportunities by comparing ETF market prices against calculated fair NAV.
+A data pipeline that scrapes, stores, and analyzes daily holdings for **State Street (SPDR) equity ETFs**. It builds a local SQLite database of ETF compositions and uses live stock prices (plus cash and FX rates) to detect arbitrage opportunities by comparing ETF market prices against calculated fair NAV.
 
 ## Architecture
 
@@ -48,24 +48,33 @@ python detect_etf_arbitrage.py
 
 This will:
 1. Load the latest composition for each ETF from the database
-2. Fetch live stock prices via yfinance for all components
-3. Calculate fair NAV: `SUM(component_shares x current_price) / shares_outstanding`
-4. Compare to the ETF's current market price
-5. Flag deviations as PREMIUM, DISCOUNT, or FAIR
+2. Classify each component as stock, cash/currency, or unpriceable
+3. Fetch live stock prices via yfinance and FX rates for foreign cash positions
+4. Calculate fair NAV: `(Stock Value + Cash Value) / Shares Outstanding`
+5. Compare to the ETF's current market price
+6. Flag deviations as PREMIUM, DISCOUNT, or FAIR with an arbitrage action
 
 **Example output:**
 ```
 ETF Arbitrage Analysis: SPY
 ============================================================
-  Components:         502/503 priced
+  Components:         502/503 priced (501 stocks, 1 cash)
   Portfolio Coverage:  99.93%
+
+  Portfolio Breakdown:
+    Stock Value:      $631,234,567,890.12
+    Cash Value:       $1,234,567,890.00
+    Total Value:      $632,469,135,780.12
 
   Market Price:       $690.6200
   Calculated NAV:     $687.0275
   Reported NAV:       $686.068797
+  Shares Outstanding: 920,560,000
 
   Premium/Discount:   +0.5229%
   Signal:             PREMIUM
+  Arbitrage Action:   SELL ETF / BUY BASKET (creation arbitrage)
+  Est. Profit/Share:  $3.5925
 ```
 
 ## Project Structure
@@ -171,7 +180,7 @@ Orchestrator function that ties everything together. Fetches ETF list, downloads
 
 ### `DetectEtfArbitrage`
 
-Calculates fair ETF NAV from live component prices and compares to market price.
+Calculates fair ETF NAV from live component prices (stocks + cash positions) and compares to market price to identify arbitrage opportunities.
 
 | Method                            | Description                                               |
 |-----------------------------------|-----------------------------------------------------------|
@@ -180,16 +189,27 @@ Calculates fair ETF NAV from live component prices and compares to market price.
 | `scan_all_etfs(threshold_pct)`    | Scan all ETFs, return sorted DataFrame of opportunities   |
 | `format_result(result)`           | Format detailed analysis for console output               |
 
+**Cash handling:**
+
+Cash and currency positions are identified by component name (exact match against 30+ currencies, plus partial matching for terms like "CASH COLLATERAL", "MONEY MARKET", "TREASURY BILL"). USD-denominated cash is valued at $1 per unit. Foreign currencies are converted to USD using live FX rates from Yahoo Finance.
+
 **Fair NAV formula:**
 ```
-Fair NAV = SUM(component_shares_i x current_price_i) / shares_outstanding
+Stock Value = SUM(stock_shares_i x stock_price_i)
+Cash Value  = SUM(cash_amount_j x fx_rate_j)
+Fair NAV    = (Stock Value + Cash Value) / Shares Outstanding
 Premium/Discount % = (market_price - fair_nav) / fair_nav x 100
 ```
 
-**Signal classification:**
-- `PREMIUM` (> +0.1%): ETF trades above fair value
-- `DISCOUNT` (< -0.1%): ETF trades below fair value
-- `FAIR` (within 0.1%): No significant deviation
+**Signal classification and arbitrage strategy:**
+
+ETF arbitrage works through the **creation/redemption mechanism** used by Authorized Participants (APs):
+
+| Signal     | Condition   | Arbitrage Action                                                   |
+|------------|-------------|--------------------------------------------------------------------|
+| `PREMIUM`  | > +0.1%     | **Sell ETF / Buy Basket** — APs buy underlying stocks, deliver to issuer to create new ETF shares, sell ETF at the higher market price (creation arbitrage) |
+| `DISCOUNT` | < -0.1%     | **Buy ETF / Sell Basket** — APs buy ETF at the lower market price, redeem with issuer for underlying stocks, sell components at their higher individual prices (redemption arbitrage) |
+| `FAIR`     | within 0.1% | **No Action** — no significant deviation                           |
 
 ## Setup
 
@@ -270,8 +290,10 @@ finally:
 
 - Holdings data from SSGA has a ~1 day lag (published after market close)
 - yfinance provides delayed/closing prices, not real-time
-- Some components cannot be priced: cash positions, futures contracts, and ticker format mismatches (coverage is typically 99%+ for large equity ETFs)
+- Cash positions are priced at $1/unit (USD) or via FX rates (foreign currencies); some exotic cash instruments may not be recognized
+- Some components cannot be priced: futures contracts and ticker format mismatches (coverage is typically 99%+ for large equity ETFs)
 - Non-USD denominated holdings in international ETFs may have lower pricing coverage
+- Arbitrage signals do not account for transaction costs, bid-ask spreads, or creation/redemption fees — real-world profitability requires APs to factor in these costs
 
 ## Acknowledgements
 
