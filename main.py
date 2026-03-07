@@ -2,8 +2,6 @@ from get_available_etfs import GetAvailableEtfs
 from get_etf_composition import GetEtfComposition
 from store_equity_etf_compositions_db import EquityEtfCompositionDb, fetch_and_store_all_etfs
 
-
-
 def main():
     """Main function to run the ETF composition storage."""
     db = EquityEtfCompositionDb(db_path = "data/etf_compositions.db")
