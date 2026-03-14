@@ -1,4 +1,8 @@
-pip install playwright
-playwright install chromium
-pip install yfinance
-pip install xlsxwriter
+pandas
+openpyxl
+xlsxwriter
+beautifulsoup4
+playwright
+yfinance
+pytz
+requests
