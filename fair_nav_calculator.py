@@ -282,11 +282,22 @@ class FairNavCalculator:
         print(f"  Components in DB:   {len(composition_df)}")
 
         # ── Step 2: Normalize component tickers ───────────────────────────
-        priceable = []    # list of (row_index, yahoo_ticker)
-        skipped   = []    # non-tradeable raw tickers (cash, futures, etc.)
+        priceable     = []    # list of (row_index, yahoo_ticker)
+        skipped       = []    # non-tradeable raw tickers (cash, futures, etc.)
+        usd_cash_rows = []    # row indices confirmed as US DOLLAR cash (priced at $1.00)
+
+        USD_CASH_KEY = '__USD_CASH__'   # sentinel key for price_map injection
 
         for idx, row in composition_df.iterrows():
-            raw_ticker   = str(row.get('component_ticker', ''))
+            raw_ticker = str(row.get('component_ticker', '')).strip()
+
+            # Check for USD cash: ticker '-'  AND  component_name confirms "US DOLLAR"
+            if raw_ticker == '-':
+                component_name = str(row.get('component_name', '')).strip().upper()
+                if 'US DOLLAR' in component_name:
+                    usd_cash_rows.append(idx)
+                    continue   # handled separately — skip normalization
+
             yahoo_ticker = self.normalize_ticker_for_yahoo(raw_ticker)
             if yahoo_ticker:
                 priceable.append((idx, yahoo_ticker))
@@ -294,18 +305,24 @@ class FairNavCalculator:
                 skipped.append(raw_ticker)
 
         priceable_yahoo = [t for _, t in priceable]
-        print(f"  Priceable:          {len(priceable)}   Skipped (non-tradeable): {len(skipped)}")
+        print(f"  Priceable:          {len(priceable)}   Skipped (non-tradeable): {len(skipped)}   USD cash: {len(usd_cash_rows)}")
 
         # ── Step 3: Batch-fetch prices from yfinance ──────────────────────
         print(f"  Fetching prices from yfinance ({len(priceable_yahoo)} tickers)...")
         price_map = self.fetch_component_prices(priceable_yahoo)
         print(f"  Prices received:    {len(price_map)} / {len(priceable_yahoo)}")
 
+        # ── Step 3b: Inject USD cash at $1.00 (no yfinance needed) ────────
+        if usd_cash_rows:
+            price_map[USD_CASH_KEY] = {'price': 1.0, 'prev_close': 1.0}
+            print(f"  USD cash rows:      {len(usd_cash_rows)} — price fixed at $1.00/unit")
+
         # ── Step 4: Coverage check ────────────────────────────────────────
-        total_weight   = composition_df['component_weight'].sum()
-        covered_weight = 0.0
-        priced_rows    = []    # (row_index, yahoo_ticker) — got a price
-        unpriced       = []    # priceable tickers with no yfinance data
+        total_weight    = composition_df['component_weight'].sum()
+        covered_weight  = 0.0
+        priced_rows     = []    # (row_index, yahoo_ticker) — got a price
+        unpriced        = []    # priceable tickers with no yfinance data
+        usd_cash_weight = 0.0   # weight fraction covered by USD cash
 
         for idx, yahoo_ticker in priceable:
             weight = composition_df.loc[idx, 'component_weight']
@@ -314,6 +331,14 @@ class FairNavCalculator:
                 priced_rows.append((idx, yahoo_ticker))
             else:
                 unpriced.append(yahoo_ticker)
+
+        # Add USD cash rows to covered weight and priced_rows
+        for idx in usd_cash_rows:
+            weight = composition_df.loc[idx, 'component_weight']
+            w = weight if pd.notna(weight) else 0.0
+            covered_weight  += w
+            usd_cash_weight += w
+            priced_rows.append((idx, USD_CASH_KEY))
 
         coverage_pct     = covered_weight / total_weight if total_weight > 0 else 0.0
         uncovered_weight = 1.0 - coverage_pct
@@ -328,14 +353,30 @@ class FairNavCalculator:
         print(f"  Coverage:           {coverage_pct*100:.2f}%  [{quality_flag}]")
 
         # ── Step 5: Primary fair NAV — shares-based ───────────────────────
+        # Formula: fair_nav = Σ(component_shares_i × price_i) / shares_outstanding
+        #
+        # priced_rows contains both equity components (yfinance prices) and the
+        # USD cash row (price = $1.00/unit injected in Step 3b). The cash
+        # contribution is: cash_shares × $1.00 = dollar amount of cash held.
+        # Both are summed into portfolio_value and divided by shares_outstanding.
         fair_nav_primary = None
+        usd_cash_value   = 0.0   # dollar value of USD cash included in NAV
+        equity_nav_value = 0.0   # dollar value of equity holdings included in NAV
+
         if quality_flag != 'INSUFFICIENT' and shares_outstanding and shares_outstanding > 0:
             portfolio_value = 0.0
             for idx, yahoo_ticker in priced_rows:
                 shares = composition_df.loc[idx, 'component_shares']
                 price  = price_map[yahoo_ticker]['price']
                 if pd.notna(shares) and price:
-                    portfolio_value += shares * price
+                    contribution    = shares * price
+                    portfolio_value += contribution
+                    # Split equity vs cash for reporting purposes
+                    if yahoo_ticker == USD_CASH_KEY:
+                        usd_cash_value   += contribution   # cash: shares × $1.00
+                    else:
+                        equity_nav_value += contribution   # equity: shares × market price
+                        
             fair_nav_primary = portfolio_value / shares_outstanding
 
         # ── Step 6: Fallback fair NAV — weight-based cross-check ──────────
@@ -414,6 +455,9 @@ class FairNavCalculator:
             market_open           = market_open,
             currency_warning      = currency_warning,
             arb_metrics           = arb_metrics,
+            usd_cash_value        = usd_cash_value,
+            usd_cash_weight_pct   = usd_cash_weight,
+            equity_nav_value      = equity_nav_value,
         )
 
     # ──────────────────────────────────────────────────────────────────────
@@ -478,7 +522,8 @@ class FairNavCalculator:
                            total_components, priced_components,
                            unpriced_components, unpriced_tickers, skipped_components,
                            quality_flag, market_open, currency_warning,
-                           arb_metrics):
+                           arb_metrics, usd_cash_value=0.0,
+                           usd_cash_weight_pct=0.0, equity_nav_value=0.0):
         """
         Assemble the final result dictionary with all output fields in a
         consistent structure. Called exclusively by calculate_fair_nav().
@@ -523,6 +568,11 @@ class FairNavCalculator:
             'quality_flag':         quality_flag,
             'market_open':          1 if market_open else 0,
 
+            # USD cash breakdown (display-only, not persisted to DB)
+            'usd_cash_value':       round(usd_cash_value,     2),
+            'usd_cash_weight_pct':  round(usd_cash_weight_pct, 4),
+            'equity_nav_value':     round(equity_nav_value,   2),
+
             # Warnings
             'currency_warning': currency_warning,
         }
@@ -543,7 +593,8 @@ if __name__ == "__main__":
     conn.row_factory = sqlite3.Row
 
     calc   = FairNavCalculator(conn)
-    result = calc.calculate_fair_nav("SPY")
+    etf_ticker = input("Input an ETF ticker to calculate: ")
+    result = calc.calculate_fair_nav(etf_ticker)
 
     if result:
         market_status = "OPEN (15-min delayed)" if result['market_open'] else "CLOSED (prior close)"

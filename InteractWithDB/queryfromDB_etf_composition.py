@@ -33,6 +33,7 @@ def get_etf_composition(etf_ticker, composition_date, db_path="data/etf_composit
         )
         if cursor.fetchone()[0] == 0:
             print(f"Composition not available: '{etf_ticker}' is not tracked in the database.")
+            print(f"Make sure '{etf_ticker}' is an ETF from State Street. ")
             print(f"Run main.py to fetch ETF data first.")
             conn.close()
             return pd.DataFrame()
@@ -146,12 +147,12 @@ def export_composition_to_excel(df, etf_ticker, composition_date, output_dir = "
         # ── Build the export copy ──────────────────────────────────────────
         holdings = df.copy()
 
-        # Display weight as percentage (multiply by 100 for readability)
+        # component_weight is stored as a percentage value (e.g. 7.7849 = 7.7849%).
+        # xlsxwriter's '0.0000%' format multiplies by 100 for display, so divide
+        # by 100 here so the cell stores the decimal fraction (0.077849) and
+        # Excel renders it correctly as 7.7849%.
         if 'component_weight' in holdings.columns:
-            holdings['component_weight'] = (
-                holdings['component_weight']
-                .apply(lambda x: round(x * 100, 6) if pd.notna(x) else x)
-            )
+            holdings['component_weight'] = holdings['component_weight'] / 100
 
         # ── Sector summary sheet ───────────────────────────────────────────
         sector_summary = (
@@ -164,9 +165,8 @@ def export_composition_to_excel(df, etf_ticker, composition_date, output_dir = "
             .rename(columns={'component_sector': 'sector'})
             .sort_values('total_weight', ascending=False)
         )
-        sector_summary['total_weight_pct'] = (
-            sector_summary['total_weight'] * 100
-        ).round(4)
+        # Same conversion: divide by 100 so pct_fmt displays correctly.
+        sector_summary['total_weight_pct'] = (sector_summary['total_weight'] / 100).round(6)
         sector_summary = sector_summary.drop(columns='total_weight')
 
         # ── Write to Excel with xlsxwriter for formatting ──────────────────
@@ -238,7 +238,7 @@ def export_composition_to_excel(df, etf_ticker, composition_date, output_dir = "
             sec_col_specs = {
                 'sector':           (36, text_fmt, alt_fmt),
                 'holding_count':    (14, int_fmt,  alt_int),
-                'total_weight_pct': (18, num_fmt,  alt_num),
+                'total_weight_pct': (18, pct_fmt,  alt_pct),
             }
 
             for col_idx, col_name in enumerate(sector_summary.columns):

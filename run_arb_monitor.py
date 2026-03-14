@@ -106,6 +106,9 @@ def print_arb_report(result):
 
     if result['fair_nav_primary'] is not None:
         print(f"    Fair NAV (primary):      ${result['fair_nav_primary']:.4f}   ← shares-based")
+        if result.get('usd_cash_value', 0) > 0:
+            print(f"      ├─ Equity holdings:      ${result['equity_nav_value']:>15,.2f}")
+            print(f"      └─ USD cash ($1.00/unit): ${result['usd_cash_value']:>15,.2f}   ({result['usd_cash_weight_pct']:.4f}% of portfolio)")
     else:
         print(f"    Fair NAV (primary):      N/A  (insufficient coverage)")
 
