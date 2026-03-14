@@ -334,7 +334,7 @@ if __name__ == "__main__":
         print(f"  {'Ticker':<8} {'Name':<35} {'Weight':>8}  {'Sector'}")
         print(f"{'─'*64}")
         for _, row in df.head(10).iterrows():
-            weight_pct = f"{float(row['component_weight'])*100:.2f}%" if pd.notna(row['component_weight']) else "N/A"
+            weight_pct = f"{float(row['component_weight']):.2f}%" if pd.notna(row['component_weight']) else "N/A"
             sector     = row['component_sector'] if pd.notna(row['component_sector']) else ""
             name       = str(row['component_name'])[:34] if pd.notna(row['component_name']) else ""
             tkr        = str(row['component_ticker'])[:7] if pd.notna(row['component_ticker']) else ""
@@ -351,7 +351,7 @@ if __name__ == "__main__":
             )
             for sector, weight in sector_weights.items():
                 if pd.notna(sector) and sector:
-                    print(f"  {sector:<40} {weight*100:.2f}%")
+                    print(f"  {sector:<40} {weight:.2f}%")
 
         print(f"\nDataFrame shape: {df.shape[0]} rows × {df.shape[1]} columns")
         print(f"Columns: {list(df.columns)}")
