@@ -1,6 +1,6 @@
-from get_available_etfs import GetAvailableEtfs
-from get_etf_composition import GetEtfComposition
-from store_equity_etf_compositions_db import EquityEtfCompositionDb, fetch_and_store_all_etfs
+from InteractWithDB.insertintoDB_equity_etf_compositions import EquityEtfCompositionDb, fetch_and_store_all_etfs
+from run_arb_monitor import run_arb_monitor
+
 
 def main():
     """Main function to run the ETF composition storage."""
@@ -27,6 +27,22 @@ def main():
     finally:
         db.close_db()
 
+    # ── Fair NAV & Arbitrage Monitor ──────────────────────────────────────
+    # Runs after the composition fetch. Opens its own DB connection.
+    # Add more tickers to monitor multiple ETFs in one run.
+
+    nav_cal = input("Start calculating the ETF NAV? (y/n): ")
+
+    if nav_cal == "y":
+
+        etf_cal = input("Input the ETF ticker: ")
+        run_arb_monitor(
+            etf_tickers   = [etf_cal],
+            db_path       = "data/etf_compositions.db",
+            store_results = True
+        )
+    else:
+        pass
 
 if __name__ == "__main__":
     main()
