@@ -117,7 +117,7 @@ export function CompositionHistory() {
                   columns={[
                     { key: 'component_ticker', label: 'Ticker' },
                     { key: 'component_name', label: 'Name' },
-                    { key: 'weight_new', label: 'New Weight', format: fmt },
+                    { key: 'shares_new', label: 'New Shares', format: fmtShares },
                     { key: 'component_sector', label: 'Sector' },
                   ]}
                   rowClass="bg-green-50 text-green-900"
@@ -135,7 +135,7 @@ export function CompositionHistory() {
                   columns={[
                     { key: 'component_ticker', label: 'Ticker' },
                     { key: 'component_name', label: 'Name' },
-                    { key: 'weight_old', label: 'Old Weight', format: fmt },
+                    { key: 'shares_old', label: 'Old Shares', format: fmtShares },
                     { key: 'component_sector', label: 'Sector' },
                   ]}
                   rowClass="bg-red-50 text-red-900"

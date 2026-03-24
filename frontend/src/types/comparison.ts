@@ -3,6 +3,7 @@ export interface AddedComponent {
   component_name: string | null
   component_ticker: string | null
   weight_new: number | null
+  shares_new: number | null
   component_sector: string | null
   component_currency: string | null
 }
@@ -12,6 +13,7 @@ export interface RemovedComponent {
   component_name: string | null
   component_ticker: string | null
   weight_old: number | null
+  shares_old: number | null
   component_sector: string | null
   component_currency: string | null
 }

@@ -7,6 +7,7 @@ class AddedComponent(BaseModel):
     component_name: Optional[str] = None
     component_ticker: Optional[str] = None
     weight_new: Optional[float] = None
+    shares_new: Optional[float] = None
     component_sector: Optional[str] = None
     component_currency: Optional[str] = None
 
@@ -16,6 +17,7 @@ class RemovedComponent(BaseModel):
     component_name: Optional[str] = None
     component_ticker: Optional[str] = None
     weight_old: Optional[float] = None
+    shares_old: Optional[float] = None
     component_sector: Optional[str] = None
     component_currency: Optional[str] = None
 

@@ -78,7 +78,8 @@ def compare_compositions(
         added_rows = conn.execute(
             """
             SELECT c2.component_identifier, c2.component_name, c2.component_ticker,
-                   c2.component_weight AS weight_new, c2.component_sector, c2.component_currency
+                   c2.component_weight AS weight_new, c2.component_shares AS shares_new,
+                   c2.component_sector, c2.component_currency
             FROM equity_etf_compositions c2
             LEFT JOIN equity_etf_compositions c1
                 ON  c1.etf_ticker           = c2.etf_ticker
@@ -96,7 +97,8 @@ def compare_compositions(
         removed_rows = conn.execute(
             """
             SELECT c1.component_identifier, c1.component_name, c1.component_ticker,
-                   c1.component_weight AS weight_old, c1.component_sector, c1.component_currency
+                   c1.component_weight AS weight_old, c1.component_shares AS shares_old,
+                   c1.component_sector, c1.component_currency
             FROM equity_etf_compositions c1
             LEFT JOIN equity_etf_compositions c2
                 ON  c2.etf_ticker           = c1.etf_ticker
