@@ -9,7 +9,6 @@ A full-stack web application that scrapes, stores, and visualises daily holdings
 | Branch | Purpose |
 |--------|---------|
 | `main` | ETF tracker — data pipeline + FastAPI backend + React web app |
-| `arb-monitor` | Legacy NAV/arbitrage calculation modules (preserved, not maintained) |
 
 ---
 
