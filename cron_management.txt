@@ -21,6 +21,13 @@ EDIT THE CRONTAB
 ----------------
   crontab -e
 
+  0  20 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
+  30 20 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
+  0  21 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
+  20 21 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
+  00 22 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
+  20 22 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
+
 This opens your crontab in the default terminal editor (usually nano or vi).
 Each line follows the format:
 

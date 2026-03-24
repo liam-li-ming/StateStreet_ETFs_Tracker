@@ -179,14 +179,17 @@ python InteractWithDB/queryfromDB_etf_composition.py
 
 ## Automated Pipeline (Cron)
 
-The pipeline runs automatically three times every weekday via user crontab.
-Times are in local time (UTC+8) — well after SSGA publishes the day's data following US market close (4 PM ET = 4 AM UTC+8).
+The pipeline runs automatically six times every weekday via user crontab (UTC+8).
+US markets close at 4 PM ET. During EDT (UTC-4) SSGA data lands around 05:00 UTC+8; during EST (UTC-5) it lands around 06:00 UTC+8 — one hour later. The extra runs at 21:20, 22:00, and 22:20 ensure holdings are captured year-round regardless of daylight saving time.
 
-| Time (UTC+8) | Cron expression |
-|--------------|-----------------|
-| 20:00        | `0 20 * * 1-5`  |
-| 20:30        | `30 20 * * 1-5` |
-| 21:00        | `0 21 * * 1-5`  |
+| Time (UTC+8) | Cron expression  |
+|--------------|------------------|
+| 20:00        | `0 20 * * 1-5`   |
+| 20:30        | `30 20 * * 1-5`  |
+| 21:00        | `0 21 * * 1-5`   |
+| 21:20        | `20 21 * * 1-5`  |
+| 22:00        | `0 22 * * 1-5`   |
+| 22:20        | `20 22 * * 1-5`  |
 
 Multiple runs are safe — `skip_existing=True` checks whether the exact `(ticker, composition_date)` from the downloaded XLSX already exists in the DB (14-day window). If it does, the ticker is skipped without a DB write. The composition date is sourced directly from the holdings-daily XLSX and cross-checked against the navhist XLSX; a date mismatch between the two files causes the ticker to be skipped.
 

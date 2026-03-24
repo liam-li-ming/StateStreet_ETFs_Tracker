@@ -7,7 +7,7 @@
 /workspace.xml
 /httpRequests/
 
-*.log
+#*.log
 
 # Python
 *.pyc
