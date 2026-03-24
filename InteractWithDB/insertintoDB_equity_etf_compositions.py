@@ -307,20 +307,20 @@ def fetch_and_store_all_etfs(db, asset_classes = None, skip_existing = True):
         comp = GetEtfComposition()
         return ticker, comp.fetch_etf_composition_to_df(ticker)
 
-    # Build in-memory set of already-stored tickers in a single DB query
-    # (replaces per-ticker composition_exists() calls inside the loop)
-    existing_tickers: set = set()
+    # Build in-memory set of (ticker, composition_date) pairs already stored — single DB query.
+    # 14-day window covers weekends, public holidays, and SSGA publication delays.
+    existing_pairs: set = set()
     if skip_existing:
         cursor = db.conn.cursor()
         cursor.execute("""
-            SELECT DISTINCT etf_ticker FROM equity_etf_compositions
-            WHERE composition_date >= date('now', '-2 days')
+            SELECT DISTINCT etf_ticker, composition_date FROM equity_etf_compositions
+            WHERE composition_date >= date('now', '-14 days')
         """)
-        existing_tickers = {row[0] for row in cursor.fetchall()}
+        existing_pairs = {(row[0], row[1]) for row in cursor.fetchall()}
 
-    print(f"\nFetching compositions concurrently with up to 100 workers...")
+    print(f"\nFetching compositions concurrently with up to 200 workers...")
 
-    with ThreadPoolExecutor(max_workers = 100) as executor:
+    with ThreadPoolExecutor(max_workers = 200) as executor:
         future_to_ticker = {
             executor.submit(fetch_composition, ticker): ticker
             for ticker in tickers
@@ -336,16 +336,21 @@ def fetch_and_store_all_etfs(db, asset_classes = None, skip_existing = True):
                 if composition_df is not None and not composition_df.empty:
                     composition_date = composition_df['composition_date'].iloc[0]
 
-                    # O(1) set lookup — no DB query per ticker
-                    if skip_existing and ticker in existing_tickers:
+                    # O(1) set lookup on (ticker, date) — skips only if this exact date is already stored
+                    if skip_existing and (ticker, composition_date) in existing_pairs:
                         print(f"  Skipping {ticker} - composition for {composition_date} already exists")
                         skip_count += 1
                         continue
 
-                    # Insert without committing; one commit after all inserts (change 6)
+                    # Insert without committing; one commit after all inserts
                     inserted = db.insert_composition(composition_df, commit=False)
-                    print(f"  Stored {inserted} holdings for {ticker} (date: {composition_date})")
-                    success_count += 1
+                    if inserted == 0:
+                        # INSERT OR IGNORE silently skipped all rows — data already in DB
+                        print(f"  Skipping {ticker} - composition for {composition_date} already exists (fallback duplicate check)")
+                        skip_count += 1
+                    else:
+                        print(f"  Stored {inserted} holdings for {ticker} (date: {composition_date})")
+                        success_count += 1
                 else:
                     print(f"  No composition data available for {ticker} (returned None — likely NAV date mismatch or fetch error)")
                     failed_tickers.append(ticker)

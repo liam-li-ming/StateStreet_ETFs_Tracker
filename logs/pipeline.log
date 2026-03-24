@@ -1,0 +1,439 @@
+Database Equity ETF tables created successfully.
+
+============================================================
+Fetching equity ETFs...
+============================================================
+Found 104 equity ETFs
+
+Total unique ETFs: 104
+Upserted 104 ETF info records.
+
+Fetching compositions concurrently with up to 100 workers...
+holdings-daily-us-en-xlc.xlsx navhist-us-en-xlc.xlsx
+holdings-daily-us-en-xlci.xlsx navhist-us-en-xlci.xlsx
+holdings-daily-us-en-xly.xlsx navhist-us-en-xly.xlsx
+holdings-daily-us-en-xlyi.xlsx navhist-us-en-xlyi.xlsx
+holdings-daily-us-en-xlp.xlsx navhist-us-en-xlp.xlsx
+holdings-daily-us-en-xlsi.xlsx navhist-us-en-xlsi.xlsx
+holdings-daily-us-en-xle.xlsx navhist-us-en-xle.xlsx
+holdings-daily-us-en-xlei.xlsx navhist-us-en-xlei.xlsx
+holdings-daily-us-en-xlf.xlsx navhist-us-en-xlf.xlsx
+holdings-daily-us-en-xlfi.xlsx navhist-us-en-xlfi.xlsx
+holdings-daily-us-en-deco.xlsx navhist-us-en-deco.xlsx
+holdings-daily-us-en-heco.xlsx navhist-us-en-heco.xlsx
+holdings-daily-us-en-tekx.xlsx navhist-us-en-tekx.xlsx
+holdings-daily-us-en-xlv.xlsx navhist-us-en-xlv.xlsx
+holdings-daily-us-en-xlvi.xlsx navhist-us-en-xlvi.xlsx
+holdings-daily-us-en-xli.xlsx navhist-us-en-xli.xlsx
+holdings-daily-us-en-xlii.xlsx navhist-us-en-xlii.xlsx
+holdings-daily-us-en-xlb.xlsx navhist-us-en-xlb.xlsx
+holdings-daily-us-en-xlbi.xlsx navhist-us-en-xlbi.xlsx
+holdings-daily-us-en-xlre.xlsx navhist-us-en-xlre.xlsx
+holdings-daily-us-en-xlri.xlsx navhist-us-en-xlri.xlsx
+holdings-daily-us-en-dia.xlsx navhist-us-en-dia.xlsx
+holdings-daily-us-en-fez.xlsx navhist-us-en-fez.xlsx
+holdings-daily-us-en-xitk.xlsx navhist-us-en-xitk.xlsx
+holdings-daily-us-en-dgt.xlsx navhist-us-en-dgt.xlsx
+holdings-daily-us-en-psk.xlsx navhist-us-en-psk.xlsx
+holdings-daily-us-en-nzac.xlsx navhist-us-en-nzac.xlsx
+holdings-daily-us-en-cwi.xlsx navhist-us-en-cwi.xlsx
+holdings-daily-us-en-efax.xlsx navhist-us-en-efax.xlsx
+holdings-daily-us-en-qefa.xlsx navhist-us-en-qefa.xlsx
+holdings-daily-us-en-eemx.xlsx navhist-us-en-eemx.xlsx
+holdings-daily-us-en-qemm.xlsx navhist-us-en-qemm.xlsx
+holdings-daily-us-en-nzus.xlsx navhist-us-en-nzus.xlsx
+holdings-daily-us-en-she.xlsx navhist-us-en-she.xlsx
+holdings-daily-us-en-qus.xlsx navhist-us-en-qus.xlsx
+holdings-daily-us-en-qwld.xlsx navhist-us-en-qwld.xlsx
+holdings-daily-us-en-xntk.xlsx navhist-us-en-xntk.xlsx
+holdings-daily-us-en-spdw.xlsx navhist-us-en-spdw.xlsx
+holdings-daily-us-en-spem.xlsx navhist-us-en-spem.xlsx
+holdings-daily-us-en-speu.xlsx navhist-us-en-speu.xlsx
+holdings-daily-us-en-spgm.xlsx navhist-us-en-spgm.xlsx
+holdings-daily-us-en-sptm.xlsx navhist-us-en-sptm.xlsx
+holdings-daily-us-en-spmd.xlsx navhist-us-en-spmd.xlsx
+holdings-daily-us-en-spym.xlsx navhist-us-en-spym.xlsx
+holdings-daily-us-en-spyg.xlsx navhist-us-en-spyg.xlsx
+holdings-daily-us-en-spyd.xlsx navhist-us-en-spyd.xlsx
+holdings-daily-us-en-spyv.xlsx navhist-us-en-spyv.xlsx
+holdings-daily-us-en-spsm.xlsx navhist-us-en-spsm.xlsx
+holdings-daily-us-en-spdg.xlsx navhist-us-en-spdg.xlsx
+holdings-daily-us-en-onev.xlsx navhist-us-en-onev.xlsx
+holdings-daily-us-en-oneo.xlsx navhist-us-en-oneo.xlsx
+holdings-daily-us-en-oney.xlsx navhist-us-en-oney.xlsx
+holdings-daily-us-en-mdyg.xlsx navhist-us-en-mdyg.xlsx
+holdings-daily-us-en-mdyv.xlsx navhist-us-en-mdyv.xlsx
+holdings-daily-us-en-efiv.xlsx navhist-us-en-efiv.xlsx
+holdings-daily-us-en-spy.xlsx navhist-us-en-spy.xlsx
+holdings-daily-us-en-slyg.xlsx navhist-us-en-slyg.xlsx
+holdings-daily-us-en-slyv.xlsx navhist-us-en-slyv.xlsx
+holdings-daily-us-en-ediv.xlsx navhist-us-en-ediv.xlsx
+holdings-daily-us-en-xcny.xlsx navhist-us-en-xcny.xlsx
+holdings-daily-us-en-cnrg.xlsx navhist-us-en-cnrg.xlsx
+holdings-daily-us-en-rokt.xlsx navhist-us-en-rokt.xlsx
+holdings-daily-us-en-fite.xlsx navhist-us-en-fite.xlsx
+holdings-daily-us-en-sims.xlsx navhist-us-en-sims.xlsx
+holdings-daily-us-en-komp.xlsx navhist-us-en-komp.xlsx
+holdings-daily-us-en-hail.xlsx navhist-us-en-hail.xlsx
+holdings-daily-us-en-mdy.xlsx navhist-us-en-mdy.xlsx
+holdings-daily-us-en-esix.xlsx navhist-us-en-esix.xlsx
+holdings-daily-us-en-mmtm.xlsx navhist-us-en-mmtm.xlsx
+holdings-daily-us-en-vlu.xlsx navhist-us-en-vlu.xlsx
+holdings-daily-us-en-spyx.xlsx navhist-us-en-spyx.xlsx
+holdings-daily-us-en-xar.xlsx navhist-us-en-xar.xlsx
+holdings-daily-us-en-kbe.xlsx navhist-us-en-kbe.xlsx
+holdings-daily-us-en-xbi.xlsx navhist-us-en-xbi.xlsx
+holdings-daily-us-en-kce.xlsx navhist-us-en-kce.xlsx
+holdings-daily-us-en-gxc.xlsx navhist-us-en-gxc.xlsx
+holdings-daily-us-en-sdy.xlsx navhist-us-en-sdy.xlsx
+holdings-daily-us-en-gmf.xlsx navhist-us-en-gmf.xlsx
+holdings-daily-us-en-ewx.xlsx navhist-us-en-ewx.xlsx
+holdings-daily-us-en-wdiv.xlsx navhist-us-en-wdiv.xlsx
+holdings-daily-us-en-xhe.xlsx navhist-us-en-xhe.xlsx
+holdings-daily-us-en-xhs.xlsx navhist-us-en-xhs.xlsx
+holdings-daily-us-en-xhb.xlsx navhist-us-en-xhb.xlsx
+holdings-daily-us-en-kie.xlsx navhist-us-en-kie.xlsx
+holdings-daily-us-en-dwx.xlsx navhist-us-en-dwx.xlsx
+holdings-daily-us-en-gwx.xlsx navhist-us-en-gwx.xlsx
+holdings-daily-us-en-xme.xlsx navhist-us-en-xme.xlsx
+holdings-daily-us-en-xes.xlsx navhist-us-en-xes.xlsx
+holdings-daily-us-en-xop.xlsx navhist-us-en-xop.xlsx
+holdings-daily-us-en-xph.xlsx navhist-us-en-xph.xlsx
+holdings-daily-us-en-kre.xlsx navhist-us-en-kre.xlsx
+holdings-daily-us-en-xrt.xlsx navhist-us-en-xrt.xlsx
+holdings-daily-us-en-xsd.xlsx navhist-us-en-xsd.xlsx
+holdings-daily-us-en-xsw.xlsx navhist-us-en-xsw.xlsx
+holdings-daily-us-en-xtl.xlsx navhist-us-en-xtl.xlsx
+holdings-daily-us-en-xtn.xlsx navhist-us-en-xtn.xlsx
+holdings-daily-us-en-lglv.xlsx navhist-us-en-lglv.xlsx
+holdings-daily-us-en-smlv.xlsx navhist-us-en-smlv.xlsx
+holdings-daily-us-en-xlk.xlsx navhist-us-en-xlk.xlsx
+holdings-daily-us-en-xlki.xlsx navhist-us-en-xlki.xlsx
+holdings-daily-us-en-spin.xlsx navhist-us-en-spin.xlsx
+
+[1/104] Processing XLCI...
+  Stored 0 holdings for XLCI (date: 2026-03-20)
+holdings-daily-us-en-xlsr.xlsx navhist-us-en-xlsr.xlsx
+
+[2/104] Processing XLC...
+  Stored 0 holdings for XLC (date: 2026-03-20)
+holdings-daily-us-en-xlu.xlsx navhist-us-en-xlu.xlsx
+
+[3/104] Processing XLFI...
+  Stored 0 holdings for XLFI (date: 2026-03-20)
+holdings-daily-us-en-xlui.xlsx navhist-us-en-xlui.xlsx
+
+[4/104] Processing XLEI...
+  Stored 0 holdings for XLEI (date: 2026-03-20)
+
+[5/104] Processing XLII...
+  Stored 0 holdings for XLII (date: 2026-03-20)
+
+[6/104] Processing XHS...
+  Stored 0 holdings for XHS (date: 2026-03-20)
+
+[7/104] Processing XLV...
+  Stored 0 holdings for XLV (date: 2026-03-20)
+
+[8/104] Processing XLP...
+  Stored 0 holdings for XLP (date: 2026-03-20)
+
+[9/104] Processing XLYI...
+  Stored 0 holdings for XLYI (date: 2026-03-20)
+
+[10/104] Processing XLY...
+  Stored 0 holdings for XLY (date: 2026-03-20)
+
+[11/104] Processing NZAC...
+  Stored 0 holdings for NZAC (date: 2026-03-20)
+
+[12/104] Processing XLF...
+  Stored 0 holdings for XLF (date: 2026-03-20)
+
+[13/104] Processing SPYD...
+  Stored 0 holdings for SPYD (date: 2026-03-20)
+
+[14/104] Processing XLKI...
+  Stored 0 holdings for XLKI (date: 2026-03-20)
+
+[15/104] Processing DECO...
+  Stored 0 holdings for DECO (date: 2026-03-20)
+
+[16/104] Processing TEKX...
+  Stored 0 holdings for TEKX (date: 2026-03-20)
+
+[17/104] Processing XLRI...
+  Stored 0 holdings for XLRI (date: 2026-03-20)
+
+[18/104] Processing ROKT...
+  Stored 0 holdings for ROKT (date: 2026-03-20)
+
+[19/104] Processing FITE...
+  Stored 0 holdings for FITE (date: 2026-03-20)
+
+[20/104] Processing SPSM...
+  Stored 0 holdings for SPSM (date: 2026-03-20)
+
+[21/104] Processing XLSI...
+  Stored 0 holdings for XLSI (date: 2026-03-20)
+
+[22/104] Processing EEMX...
+  Stored 0 holdings for EEMX (date: 2026-03-20)
+
+[23/104] Processing XLBI...
+  Stored 0 holdings for XLBI (date: 2026-03-20)
+
+[24/104] Processing SDY...
+  Stored 0 holdings for SDY (date: 2026-03-20)
+
+[25/104] Processing SIMS...
+  Stored 0 holdings for SIMS (date: 2026-03-20)
+
+[26/104] Processing XES...
+  Stored 0 holdings for XES (date: 2026-03-20)
+
+[27/104] Processing PSK...
+  Stored 0 holdings for PSK (date: 2026-03-20)
+
+[28/104] Processing EDIV...
+  Stored 0 holdings for EDIV (date: 2026-03-20)
+
+[29/104] Processing EFAX...
+  Stored 0 holdings for EFAX (date: 2026-03-20)
+
+[30/104] Processing XHE...
+  Stored 0 holdings for XHE (date: 2026-03-20)
+
+[31/104] Processing SPY...
+  Stored 0 holdings for SPY (date: 2026-03-20)
+
+[32/104] Processing XITK...
+  Stored 0 holdings for XITK (date: 2026-03-20)
+
+[33/104] Processing XSW...
+  Stored 0 holdings for XSW (date: 2026-03-20)
+
+[34/104] Processing SPDG...
+  Stored 0 holdings for SPDG (date: 2026-03-20)
+
+[35/104] Processing NZUS...
+  Stored 0 holdings for NZUS (date: 2026-03-20)
+
+[36/104] Processing SPYX...
+  Stored 0 holdings for SPYX (date: 2026-03-20)
+
+[37/104] Processing XLRE...
+  Stored 0 holdings for XLRE (date: 2026-03-20)
+
+[38/104] Processing XLB...
+  Stored 0 holdings for XLB (date: 2026-03-20)
+
+[39/104] Processing XRT...
+  Stored 0 holdings for XRT (date: 2026-03-20)
+
+[40/104] Processing CNRG...
+  Stored 0 holdings for CNRG (date: 2026-03-20)
+
+[41/104] Processing XLE...
+  Stored 0 holdings for XLE (date: 2026-03-20)
+
+[42/104] Processing XAR...
+  Stored 0 holdings for XAR (date: 2026-03-20)
+
+[43/104] Processing HECO...
+  Stored 0 holdings for HECO (date: 2026-03-20)
+
+[44/104] Processing SLYG...
+  Stored 0 holdings for SLYG (date: 2026-03-20)
+
+[45/104] Processing SPYG...
+  Stored 0 holdings for SPYG (date: 2026-03-20)
+
+[46/104] Processing XLI...
+  Stored 0 holdings for XLI (date: 2026-03-20)
+
+[47/104] Processing XLVI...
+  Stored 0 holdings for XLVI (date: 2026-03-20)
+
+[48/104] Processing XOP...
+  Stored 0 holdings for XOP (date: 2026-03-20)
+
+[49/104] Processing XHB...
+  Stored 0 holdings for XHB (date: 2026-03-20)
+
+[50/104] Processing XPH...
+  Stored 0 holdings for XPH (date: 2026-03-20)
+
+[51/104] Processing ESIX...
+  Stored 0 holdings for ESIX (date: 2026-03-20)
+
+[52/104] Processing XNTK...
+  Stored 0 holdings for XNTK (date: 2026-03-20)
+
+[53/104] Processing HAIL...
+  Stored 0 holdings for HAIL (date: 2026-03-20)
+
+[54/104] Processing MDY...
+  Skipping MDY - composition for 2026-03-23 already exists
+
+[55/104] Processing VLU...
+  Stored 0 holdings for VLU (date: 2026-03-20)
+
+[56/104] Processing XSD...
+  Stored 0 holdings for XSD (date: 2026-03-20)
+
+[57/104] Processing MDYG...
+  Stored 0 holdings for MDYG (date: 2026-03-20)
+
+[58/104] Processing SHE...
+  Stored 0 holdings for SHE (date: 2026-03-20)
+
+[59/104] Processing SPYM...
+  Stored 0 holdings for SPYM (date: 2026-03-20)
+
+[60/104] Processing XBI...
+  Stored 0 holdings for XBI (date: 2026-03-20)
+
+[61/104] Processing XME...
+  Stored 0 holdings for XME (date: 2026-03-20)
+
+[62/104] Processing KCE...
+  Stored 0 holdings for KCE (date: 2026-03-20)
+
+[63/104] Processing GMF...
+  Stored 0 holdings for GMF (date: 2026-03-20)
+
+[64/104] Processing DIA...
+  Stored 0 holdings for DIA (date: 2026-03-20)
+
+[65/104] Processing SLYV...
+  Stored 0 holdings for SLYV (date: 2026-03-20)
+
+[66/104] Processing DWX...
+  Stored 0 holdings for DWX (date: 2026-03-20)
+
+[67/104] Processing EFIV...
+  Stored 0 holdings for EFIV (date: 2026-03-20)
+
+[68/104] Processing XTN...
+  Stored 0 holdings for XTN (date: 2026-03-20)
+
+[69/104] Processing XTL...
+  Stored 0 holdings for XTL (date: 2026-03-20)
+
+[70/104] Processing KIE...
+  Stored 0 holdings for KIE (date: 2026-03-20)
+
+[71/104] Processing KRE...
+  Stored 0 holdings for KRE (date: 2026-03-20)
+
+[72/104] Processing FEZ...
+  Stored 0 holdings for FEZ (date: 2026-03-20)
+
+[73/104] Processing ONEY...
+  Stored 0 holdings for ONEY (date: 2026-03-20)
+
+[74/104] Processing SPMD...
+  Stored 0 holdings for SPMD (date: 2026-03-20)
+
+[75/104] Processing LGLV...
+  Stored 0 holdings for LGLV (date: 2026-03-20)
+
+[76/104] Processing MDYV...
+  Stored 0 holdings for MDYV (date: 2026-03-20)
+
+[77/104] Processing QEFA...
+  Stored 0 holdings for QEFA (date: 2026-03-20)
+
+[78/104] Processing ONEV...
+  Stored 0 holdings for ONEV (date: 2026-03-20)
+
+[79/104] Processing WDIV...
+  Stored 0 holdings for WDIV (date: 2026-03-20)
+
+[80/104] Processing SMLV...
+  Stored 0 holdings for SMLV (date: 2026-03-20)
+
+[81/104] Processing SPTM...
+  Stored 0 holdings for SPTM (date: 2026-03-20)
+
+[82/104] Processing KOMP...
+  Stored 0 holdings for KOMP (date: 2026-03-20)
+
+[83/104] Processing SPYV...
+  Stored 0 holdings for SPYV (date: 2026-03-20)
+
+[84/104] Processing KBE...
+  Stored 0 holdings for KBE (date: 2026-03-20)
+
+[85/104] Processing QUS...
+  Stored 0 holdings for QUS (date: 2026-03-20)
+
+[86/104] Processing DGT...
+  Stored 0 holdings for DGT (date: 2026-03-20)
+
+[87/104] Processing XLK...
+  Stored 0 holdings for XLK (date: 2026-03-20)
+
+[88/104] Processing ONEO...
+  Stored 0 holdings for ONEO (date: 2026-03-20)
+
+[89/104] Processing XCNY...
+  Stored 0 holdings for XCNY (date: 2026-03-20)
+
+[90/104] Processing CWI...
+  Stored 0 holdings for CWI (date: 2026-03-20)
+
+[91/104] Processing QEMM...
+  Stored 0 holdings for QEMM (date: 2026-03-20)
+
+[92/104] Processing QWLD...
+  Stored 0 holdings for QWLD (date: 2026-03-20)
+
+[93/104] Processing SPEU...
+  Stored 0 holdings for SPEU (date: 2026-03-20)
+
+[94/104] Processing MMTM...
+  Stored 0 holdings for MMTM (date: 2026-03-20)
+
+[95/104] Processing GXC...
+  Stored 0 holdings for GXC (date: 2026-03-20)
+
+[96/104] Processing SPDW...
+  Stored 0 holdings for SPDW (date: 2026-03-20)
+
+[97/104] Processing SPGM...
+  Stored 0 holdings for SPGM (date: 2026-03-20)
+
+[98/104] Processing EWX...
+  Stored 0 holdings for EWX (date: 2026-03-20)
+
+[99/104] Processing GWX...
+  Stored 0 holdings for GWX (date: 2026-03-20)
+
+[100/104] Processing SPEM...
+  Stored 0 holdings for SPEM (date: 2026-03-20)
+
+[101/104] Processing SPIN...
+  Stored 0 holdings for SPIN (date: 2026-03-20)
+
+[102/104] Processing XLUI...
+  Stored 0 holdings for XLUI (date: 2026-03-20)
+
+[103/104] Processing XLSR...
+  Stored 0 holdings for XLSR (date: 2026-03-20)
+
+[104/104] Processing XLU...
+  Stored 0 holdings for XLU (date: 2026-03-20)
+
+============================================================
+Summary:
+  Successfully stored: 103
+  Skipped (existing): 1
+  Failed: 0
+============================================================
+
+Database Statistics:
+  Total ETFs tracked: 104
+  Total composition records: 261587
+  Unique composition dates: 7
