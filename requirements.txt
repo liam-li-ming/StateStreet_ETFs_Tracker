@@ -6,3 +6,7 @@ playwright
 yfinance
 pytz
 requests
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
