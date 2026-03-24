@@ -7,6 +7,8 @@
 /workspace.xml
 /httpRequests/
 
+*.log
+
 # Python
 *.pyc
 __pycache__/

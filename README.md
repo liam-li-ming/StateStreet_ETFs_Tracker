@@ -31,7 +31,7 @@ Every trading day, SSGA publishes updated Excel files listing the holdings of ea
 |------|---------|
 | `retrievefromWEB_available_etfs.py` | Scrapes the SSGA fund finder with headless Chromium (Playwright) — plain HTTP won't work |
 | `retrievefromWEB_etf_composition.py` | Downloads and parses the per-ETF holdings `.xlsx` from SSGA's CDN |
-| `insertintoDB_equity_etf_compositions.py` | DB manager + concurrent fetch orchestrator (`ThreadPoolExecutor`, up to 100 workers) |
+| `insertintoDB_equity_etf_compositions.py` | DB manager + concurrent fetch orchestrator (`ThreadPoolExecutor`, up to 200 workers); skips tickers whose exact XLSX date is already in the DB |
 | `queryfromDB_etf_composition.py` | Query helper; exports any composition to a formatted two-sheet Excel workbook |
 
 ### FastAPI Backend (`backend/`)
@@ -188,7 +188,7 @@ Times are in local time (UTC+8) — well after SSGA publishes the day's data fol
 | 20:30        | `30 20 * * 1-5` |
 | 21:00        | `0 21 * * 1-5`  |
 
-Multiple runs are safe — `skip_existing=True` means already-stored holdings are skipped silently.
+Multiple runs are safe — `skip_existing=True` checks whether the exact `(ticker, composition_date)` from the downloaded XLSX already exists in the DB (14-day window). If it does, the ticker is skipped without a DB write. The composition date is sourced directly from the holdings-daily XLSX and cross-checked against the navhist XLSX; a date mismatch between the two files causes the ticker to be skipped.
 
 Logs are written to `logs/pipeline.log`. See `cron_management.txt` for instructions on viewing and editing the schedule.
 
