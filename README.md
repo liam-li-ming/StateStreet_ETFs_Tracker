@@ -133,10 +133,10 @@ python main.py
 ### Start the backend
 
 ```bash
-uvicorn backend.main:app --reload
+uvicorn backend.main:app --reload --port 8002
 ```
 
-API available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
+API available at `http://localhost:8002`. Interactive docs at `http://localhost:8002/docs`.
 
 ### Start the frontend
 
@@ -144,7 +144,7 @@ API available at `http://localhost:8000`. Interactive docs at `http://localhost:
 cd frontend && npm run dev
 ```
 
-Web app available at `http://localhost:5173`. All `/api/*` requests are proxied to the backend automatically in development.
+Web app available at `http://localhost:8003`. All `/api/*` requests are proxied to the backend automatically in development.
 
 ### Query the database / export to Excel (CLI)
 

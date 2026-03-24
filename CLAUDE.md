@@ -18,14 +18,14 @@ playwright install chromium
 python main.py
 
 # Start FastAPI backend (run from project root)
-uvicorn backend.main:app --reload
+uvicorn backend.main:app --reload --port 8002
 
 # Query DB / export holdings to Excel (CLI)
 python InteractWithDB/queryfromDB_etf_composition.py
 
 # Frontend — development (requires Node.js via nvm)
 source ~/.nvm/nvm.sh
-cd frontend && npm install && npm run dev   # http://localhost:5173
+cd frontend && npm install && npm run dev   # http://localhost:8003
 
 # Frontend — production build
 cd frontend && npm run build
@@ -45,7 +45,7 @@ No test suite exists in this project.
 
 ### FastAPI Backend (`backend/`)
 
-Run from project root so `InteractWithDB` package is importable: `uvicorn backend.main:app --reload`
+Run from project root so `InteractWithDB` package is importable: `uvicorn backend.main:app --reload --port 8002`
 
 | File | Purpose |
 |------|---------|
@@ -59,7 +59,7 @@ Run from project root so `InteractWithDB` package is importable: `uvicorn backen
 | `backend/routers/pipeline.py` | `POST /api/pipeline/refresh` (BackgroundTask), `GET /api/pipeline/status` |
 | `backend/schemas/` | Pydantic response models |
 
-**CORS**: Dev origins hardcoded (`localhost:5173`). Production: set `ENV=production` and `ALLOWED_ORIGINS=https://...` env vars.
+**CORS**: Dev origins hardcoded (`localhost:8003`). Production: set `ENV=production` and `ALLOWED_ORIGINS=https://...` env vars.
 
 **Playwright + FastAPI**: `GetAvailableEtfs.fetch_url_content()` uses `sync_playwright()` — must always run in a plain Python function/thread, never in an async handler directly.
 
@@ -67,7 +67,7 @@ Run from project root so `InteractWithDB` package is importable: `uvicorn backen
 
 Vite + React 18 + TypeScript + Tailwind CSS 3 + Recharts + TanStack Table + TanStack Query.
 
-Vite proxy: all `/api/*` requests forwarded to `http://localhost:8000` in dev (see `vite.config.ts`).
+Vite proxy: all `/api/*` requests forwarded to `http://localhost:8002` in dev (see `vite.config.ts`).
 
 | Page | Route | Description |
 |------|-------|-------------|
