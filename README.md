@@ -133,6 +133,7 @@ python main.py
 ### Start the backend and frontend together
 
 ```bash
+# Only needed if you use NVM to manage Node versions. Skip this if Node is already available (check with `node -v`).
 source ~/.nvm/nvm.sh
 cd frontend && npm run dev:all
 ```
