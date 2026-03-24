@@ -130,21 +130,27 @@ cd frontend && npm install && cd ..
 python main.py
 ```
 
-### Start the backend
+### Start the backend and frontend together
 
 ```bash
-uvicorn backend.main:app --reload --port 8002
+source ~/.nvm/nvm.sh
+cd frontend && npm run dev:all
 ```
 
-API available at `http://localhost:8002`. Interactive docs at `http://localhost:8002/docs`.
+This starts both servers concurrently with labeled output. Backend at `http://localhost:8002` (docs at `/docs`), frontend at `http://localhost:8003`.
 
-### Start the frontend
+### Start them separately
 
 ```bash
+# Backend (run from project root)
+uvicorn backend.main:app --reload --port 8002
+
+# Frontend (in a separate terminal)
+source ~/.nvm/nvm.sh
 cd frontend && npm run dev
 ```
 
-Web app available at `http://localhost:8003`. All `/api/*` requests are proxied to the backend automatically in development.
+All `/api/*` requests are proxied to the backend automatically in development.
 
 ### Query the database / export to Excel (CLI)
 
