@@ -171,6 +171,23 @@ python InteractWithDB/queryfromDB_etf_composition.py
 
 ---
 
+## Automated Pipeline (Cron)
+
+The pipeline runs automatically three times every weekday via user crontab.
+Times are in local time (UTC+8) — well after SSGA publishes the day's data following US market close (4 PM ET = 4 AM UTC+8).
+
+| Time (UTC+8) | Cron expression |
+|--------------|-----------------|
+| 20:00        | `0 20 * * 1-5`  |
+| 20:30        | `30 20 * * 1-5` |
+| 21:00        | `0 21 * * 1-5`  |
+
+Multiple runs are safe — `skip_existing=True` means already-stored holdings are skipped silently.
+
+Logs are written to `logs/pipeline.log`. See `cron_management.txt` for instructions on viewing and editing the schedule.
+
+---
+
 ## Notes
 
 - **T-1 holdings** — SSGA publishes the previous trading day's holdings.

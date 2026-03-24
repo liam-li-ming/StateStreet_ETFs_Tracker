@@ -24,3 +24,6 @@ frontend/.env.production
 # Data / exports
 "ETF Composition DB/"
 data/*.db
+
+# md files
+CLAUDE.md
