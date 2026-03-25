@@ -3,14 +3,17 @@ SSGA ETF Tracker — Cron Management Guide
 
 CURRENT SCHEDULE
 ----------------
-Three runs every weekday (Mon-Fri), all logging to logs/pipeline.log.
+One log-cleanup run + six ETF pipeline runs every weekday (Mon-Fri).
 Times are in local time (UTC+8). US markets close at 4 PM ET = 04:00 UTC+8,
 so running at 20:00-21:00 UTC+8 ensures SSGA has published the day's data.
 
+  19:55   55 19 * * 1-5   — truncate logs/pipeline.log (clean before pipeline starts)
   20:00    0 20 * * 1-5
   20:30   30 20 * * 1-5
   21:00    0 21 * * 1-5
-
+  21:20   20 21 * * 1-5
+  22:00   00 22 * * 1-5
+  22:20   20 22 * * 1-5
 
 VIEW THE CRONTAB
 ----------------
@@ -21,6 +24,7 @@ EDIT THE CRONTAB
 ----------------
   crontab -e
 
+  55 19 * * 1-5 truncate -s 0 /home/liam/Documents/StateStreet_ETFs_Tracker/logs/pipeline.log
   0  20 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
   30 20 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
   0  21 * * 1-5 cd /home/liam/Documents/StateStreet_ETFs_Tracker && /home/liam/miniforge3/bin/python main.py >> logs/pipeline.log 2>&1
