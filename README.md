@@ -42,7 +42,7 @@ Every trading day, SSGA publishes updated Excel files listing the holdings of ea
 | `backend/config.py` | `DB_PATH` (absolute, resolved from `__file__`), CORS origins |
 | `backend/database.py` | `get_db()` context manager; creates `etf_composition_changes` table on startup |
 | `backend/routers/etfs.py` | `GET /api/etfs`, `/api/etfs/{ticker}`, `/api/etfs/{ticker}/dates` |
-| `backend/routers/compositions.py` | `/compositions/{date}`, `/compare`, `/changes`; populates change cache |
+| `backend/routers/compositions.py` | `/compositions/{date}`, `/compare`, `/changes`, `/compositions/{date}/download`; populates change cache |
 | `backend/routers/alerts.py` | `GET /api/alerts` — paginated global feed of changes across all ETFs |
 | `backend/routers/search.py` | `GET /api/search?component=NVDA` — which ETFs hold a given ticker |
 | `backend/routers/pipeline.py` | `POST /api/pipeline/refresh` (BackgroundTask), `GET /api/pipeline/status` |
@@ -58,6 +58,9 @@ Vite + React 18 + TypeScript + Tailwind CSS + Recharts + TanStack Table + TanSta
 | Composition History | `/etfs/:ticker/history` | Date pickers + color-coded diff (added/removed/share changes) |
 | Rebalancing Alerts | `/alerts` | Paginated global feed of component changes across all ETFs |
 | Cross-ETF Search | `/search` | "Which ETFs hold NVDA?" search |
+| Download | `/download` | Export ETF composition + metadata as XLSX, CSV, or JSON |
+
+Date inputs on ETF Detail and Composition History use a custom `DatePickerCalendar` component: a text input (YYYY-MM-DD) with a calendar popup that highlights only the dates for which data exists. Non-available dates are greyed out and non-selectable.
 
 ---
 
@@ -169,6 +172,7 @@ python InteractWithDB/queryfromDB_etf_composition.py
 | GET | `/api/etfs/{ticker}` | ETF metadata + latest holdings |
 | GET | `/api/etfs/{ticker}/dates` | All stored composition dates |
 | GET | `/api/etfs/{ticker}/compositions/{date}` | Full holdings for a date |
+| GET | `/api/etfs/{ticker}/compositions/{date}/download` | Download composition as `?format=xlsx\|csv\|json` |
 | GET | `/api/etfs/{ticker}/compare` | Diff between two dates |
 | GET | `/api/etfs/{ticker}/changes` | Timeline of all consecutive-date changes |
 | GET | `/api/alerts` | Global paginated feed of changes across all ETFs |
