@@ -55,8 +55,8 @@ export function ETFDirectory() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">ETF Directory</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">ETF Directory</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {data ? `${data.total} SSGA ETFs tracked` : 'Loading…'}
           </p>
         </div>
@@ -66,7 +66,7 @@ export function ETFDirectory() {
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Search ticker or name…"
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <button
             type="submit"
@@ -78,7 +78,7 @@ export function ETFDirectory() {
             <button
               type="button"
               onClick={() => { setQ(''); setInput('') }}
-              className="rounded-lg border px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Clear
             </button>
@@ -90,22 +90,22 @@ export function ETFDirectory() {
       {isError && <ErrorMessage message="Failed to load ETFs." />}
 
       {data && (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               {table.getHeaderGroups().map(hg => (
                 <tr key={hg.id}>
                   {hg.headers.map(h => (
                     <th
                       key={h.id}
                       onClick={h.column.getToggleSortingHandler()}
-                      className="px-4 py-3 text-left font-semibold text-gray-700 cursor-pointer select-none whitespace-nowrap hover:bg-gray-100"
+                      className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-600"
                     >
                       {flexRender(h.column.columnDef.header, h.getContext())}
                       {h.column.getIsSorted() === 'asc' ? ' ↑' : h.column.getIsSorted() === 'desc' ? ' ↓' : ''}
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
                     History
                   </th>
                 </tr>
@@ -115,10 +115,10 @@ export function ETFDirectory() {
               {table.getRowModel().rows.map((row, i) => (
                 <tr
                   key={row.id}
-                  className={`border-b last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}
+                  className={`border-b border-gray-100 dark:border-gray-700 last:border-0 ${i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700/50'} hover:bg-blue-50 dark:hover:bg-blue-900/20`}
                 >
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-4 py-2 text-gray-700 whitespace-nowrap">
+                    <td key={cell.id} className="px-4 py-2 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

@@ -45,7 +45,6 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
   const containerRef = useRef<HTMLDivElement>(null)
   const availableSet = new Set(availableDates)
 
-  // Sync input display and calendar view when value prop changes
   useEffect(() => {
     setInputValue(value)
     setInputError(false)
@@ -56,7 +55,6 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
     }
   }, [value])
 
-  // Close calendar on outside click
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -105,7 +103,6 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
     else setViewMonth(m => m + 1)
   }
 
-  // Build calendar cells
   const daysInMonth = getDaysInMonth(viewYear, viewMonth)
   const firstDay = getFirstDayOfMonth(viewYear, viewMonth)
   const cells: (string | null)[] = Array(firstDay).fill(null)
@@ -117,7 +114,7 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
 
   return (
     <div ref={containerRef} className="relative">
-      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
+      {label && <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{label}</label>}
       <div className="flex items-center gap-1">
         <input
           type="text"
@@ -126,16 +123,16 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
           onBlur={e => commitInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') commitInput(inputValue) }}
           placeholder="YYYY-MM-DD"
-          className={`rounded-lg border px-3 py-2 text-sm w-32 focus:outline-none focus:ring-2 ${
+          className={`rounded-lg border px-3 py-2 text-sm w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 ${
             inputError
               ? 'border-red-400 focus:ring-red-300'
-              : 'border-gray-300 focus:ring-blue-400'
+              : 'border-gray-300 dark:border-gray-600 focus:ring-blue-400'
           }`}
         />
         <button
           type="button"
           onClick={() => setIsOpen(o => !o)}
-          className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-500"
+          className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400"
           title="Open calendar"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -150,23 +147,23 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
       )}
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 bg-white rounded-xl border border-gray-200 shadow-lg p-3 w-60">
+        <div className="absolute z-50 mt-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg p-3 w-60">
           {/* Month navigation */}
           <div className="flex items-center justify-between mb-2">
             <button
               type="button"
               onClick={prevMonth}
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-600 text-lg leading-none"
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-lg leading-none"
             >
               ‹
             </button>
-            <span className="text-sm font-semibold text-gray-800">
+            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
               {MONTH_NAMES[viewMonth]} {viewYear}
             </span>
             <button
               type="button"
               onClick={nextMonth}
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-600 text-lg leading-none"
+              className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-lg leading-none"
             >
               ›
             </button>
@@ -175,7 +172,7 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
           {/* Day-of-week headers */}
           <div className="grid grid-cols-7 mb-1">
             {DAY_NAMES.map(d => (
-              <div key={d} className="text-center text-xs font-medium text-gray-400 py-0.5">{d}</div>
+              <div key={d} className="text-center text-xs font-medium text-gray-400 dark:text-gray-500 py-0.5">{d}</div>
             ))}
           </div>
 
@@ -195,8 +192,8 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
                     isSelected
                       ? 'bg-blue-600 text-white font-bold'
                       : isAvailable
-                        ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 font-medium cursor-pointer'
-                        : 'text-gray-300 cursor-not-allowed'
+                        ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/60 font-medium cursor-pointer'
+                        : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                   }`}
                 >
                   {parseInt(dateStr.slice(8))}
@@ -206,8 +203,8 @@ export function DatePickerCalendar({ label, value, onChange, availableDates }: P
           </div>
 
           {/* Legend */}
-          <div className="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1.5 text-xs text-gray-400">
-            <span className="inline-block w-3 h-3 bg-blue-100 rounded-full" />
+          <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+            <span className="inline-block w-3 h-3 bg-blue-100 dark:bg-blue-900/40 rounded-full" />
             Data available
           </div>
         </div>

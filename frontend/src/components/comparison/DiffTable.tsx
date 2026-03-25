@@ -14,15 +14,15 @@ interface Props {
 
 export function DiffTable({ rows, columns, rowClass, emptyMessage }: Props) {
   if (!rows.length) {
-    return <p className="text-sm text-gray-400 py-2">{emptyMessage}</p>
+    return <p className="text-sm text-gray-400 dark:text-gray-500 py-2">{emptyMessage}</p>
   }
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
       <table className="min-w-full text-sm">
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
             {columns.map(c => (
-              <th key={c.key} className="px-3 py-2 text-left font-semibold text-gray-700 whitespace-nowrap">
+              <th key={c.key} className="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 {c.label}
               </th>
             ))}

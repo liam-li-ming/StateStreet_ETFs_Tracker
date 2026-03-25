@@ -50,21 +50,21 @@ export function HoldingsTable({ holdings, truncated }: Props) {
   })
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
+    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
       {truncated && (
-        <p className="bg-yellow-50 px-4 py-2 text-xs text-yellow-700 border-b border-yellow-200">
+        <p className="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 text-xs text-yellow-700 dark:text-yellow-300 border-b border-yellow-200 dark:border-yellow-800">
           Showing first {holdings.length} holdings. Use the Composition page for the full list.
         </p>
       )}
       <table className="min-w-full text-sm">
-        <thead className="bg-gray-50 sticky top-0">
+        <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0">
           {table.getHeaderGroups().map(hg => (
             <tr key={hg.id}>
               {hg.headers.map(h => (
                 <th
                   key={h.id}
                   onClick={h.column.getToggleSortingHandler()}
-                  className="px-3 py-2 text-left font-semibold text-gray-700 cursor-pointer select-none whitespace-nowrap"
+                  className="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300 cursor-pointer select-none whitespace-nowrap"
                 >
                   {flexRender(h.column.columnDef.header, h.getContext())}
                   {h.column.getIsSorted() === 'asc' ? ' ↑' : h.column.getIsSorted() === 'desc' ? ' ↓' : ''}
@@ -75,9 +75,9 @@ export function HoldingsTable({ holdings, truncated }: Props) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row, i) => (
-            <tr key={row.id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+            <tr key={row.id} className={i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700/50'}>
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className="px-3 py-1.5 text-gray-700 whitespace-nowrap">
+                <td key={cell.id} className="px-3 py-1.5 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

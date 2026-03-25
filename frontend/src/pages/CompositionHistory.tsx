@@ -39,16 +39,16 @@ export function CompositionHistory() {
 
   return (
     <div>
-      <div className="mb-4 text-sm text-gray-500">
+      <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
         <Link to="/" className="hover:underline text-blue-600">Directory</Link>
         {' / '}
         <Link to={`/etfs/${upper}`} className="hover:underline text-blue-600">{upper}</Link>
         {' / '}
-        <span className="text-gray-800 font-semibold">Composition History</span>
+        <span className="text-gray-800 dark:text-gray-200 font-semibold">Composition History</span>
       </div>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">{upper} — Composition History</h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{upper} — Composition History</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
         Compare holdings between any two stored snapshot dates.
       </p>
 
@@ -59,14 +59,14 @@ export function CompositionHistory() {
       {dates.length >= 2 && (
         <>
           {/* Date selectors */}
-          <div className="flex items-center gap-4 mb-6 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+          <div className="flex items-center gap-4 mb-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
             <DatePickerCalendar
               label="From date"
               value={d1}
               onChange={setDate1}
               availableDates={dates}
             />
-            <span className="text-gray-400 mt-5">→</span>
+            <span className="text-gray-400 dark:text-gray-500 mt-5">→</span>
             <DatePickerCalendar
               label="To date"
               value={d2}
@@ -83,9 +83,9 @@ export function CompositionHistory() {
               {/* Summary */}
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { label: 'Added', count: compare.summary.added_count, color: 'text-green-700 bg-green-50 border-green-200' },
-                  { label: 'Removed', count: compare.summary.removed_count, color: 'text-red-700 bg-red-50 border-red-200' },
-                  { label: 'Share Changes', count: compare.summary.weight_changes_count, color: 'text-yellow-700 bg-yellow-50 border-yellow-200' },
+                  { label: 'Added', count: compare.summary.added_count, color: 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' },
+                  { label: 'Removed', count: compare.summary.removed_count, color: 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' },
+                  { label: 'Share Changes', count: compare.summary.weight_changes_count, color: 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' },
                 ].map(({ label, count, color }) => (
                   <div key={label} className={`rounded-xl border p-4 ${color}`}>
                     <p className="text-2xl font-bold">{count}</p>
@@ -95,8 +95,8 @@ export function CompositionHistory() {
               </div>
 
               {/* Added */}
-              <div className="rounded-xl bg-white border border-gray-200 p-5 shadow-sm">
-                <h2 className="text-base font-semibold text-green-700 mb-3">
+              <div className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                <h2 className="text-base font-semibold text-green-700 dark:text-green-400 mb-3">
                   ✚ Added ({compare.summary.added_count})
                 </h2>
                 <DiffTable
@@ -107,14 +107,14 @@ export function CompositionHistory() {
                     { key: 'shares_new', label: 'New Shares', format: fmtShares },
                     { key: 'component_sector', label: 'Sector' },
                   ]}
-                  rowClass="bg-green-50 text-green-900"
+                  rowClass="bg-green-50 dark:bg-green-900/20 text-green-900 dark:text-green-300"
                   emptyMessage="No components added."
                 />
               </div>
 
               {/* Removed */}
-              <div className="rounded-xl bg-white border border-gray-200 p-5 shadow-sm">
-                <h2 className="text-base font-semibold text-red-700 mb-3">
+              <div className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                <h2 className="text-base font-semibold text-red-700 dark:text-red-400 mb-3">
                   ✕ Removed ({compare.summary.removed_count})
                 </h2>
                 <DiffTable
@@ -125,14 +125,14 @@ export function CompositionHistory() {
                     { key: 'shares_old', label: 'Old Shares', format: fmtShares },
                     { key: 'component_sector', label: 'Sector' },
                   ]}
-                  rowClass="bg-red-50 text-red-900"
+                  rowClass="bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-300"
                   emptyMessage="No components removed."
                 />
               </div>
 
               {/* Share changes */}
-              <div className="rounded-xl bg-white border border-gray-200 p-5 shadow-sm">
-                <h2 className="text-base font-semibold text-yellow-700 mb-3">
+              <div className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                <h2 className="text-base font-semibold text-yellow-700 dark:text-yellow-400 mb-3">
                   ↕ Share Changes ({compare.summary.weight_changes_count})
                 </h2>
                 <DiffTable
@@ -145,7 +145,7 @@ export function CompositionHistory() {
                     { key: 'shares_delta', label: 'Δ Shares', format: fmtSharesDelta },
                     { key: 'component_sector', label: 'Sector' },
                   ]}
-                  rowClass="bg-yellow-50 text-yellow-900"
+                  rowClass="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-300"
                   emptyMessage="No share count changes detected."
                 />
               </div>

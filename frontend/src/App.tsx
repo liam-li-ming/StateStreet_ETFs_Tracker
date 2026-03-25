@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThemeProvider } from './context/ThemeContext'
 import { Layout } from './components/layout/Layout'
 import { ETFDirectory } from './pages/ETFDirectory'
 import { ETFDetail } from './pages/ETFDetail'
@@ -12,6 +13,7 @@ const queryClient = new QueryClient()
 
 export default function App() {
   return (
+    <ThemeProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
@@ -26,5 +28,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
+    </ThemeProvider>
   )
 }

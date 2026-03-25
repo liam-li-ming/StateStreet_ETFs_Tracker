@@ -11,7 +11,6 @@ export function Download() {
 
   const { data: detail, isLoading, isError } = useEtfDetail(confirmedTicker)
 
-  // Default to latest available date when ETF loads
   useEffect(() => {
     if (detail?.available_dates?.length) {
       setSelectedDate(detail.available_dates[0])
@@ -44,14 +43,14 @@ export function Download() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Download Composition</h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">Download Composition</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
         Download the full ETF holdings and metadata for a given date.
       </p>
 
       {/* Ticker input */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm mb-4">
-        <label className="block text-xs font-medium text-gray-500 mb-1">ETF Ticker</label>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm mb-4">
+        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">ETF Ticker</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -59,7 +58,7 @@ export function Download() {
             onChange={e => setInputTicker(e.target.value.toUpperCase())}
             onKeyDown={e => { if (e.key === 'Enter') handleLoad() }}
             placeholder="e.g. SPY"
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono uppercase"
+            className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 px-3 py-2 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono uppercase"
           />
           <button
             onClick={handleLoad}
@@ -71,16 +70,16 @@ export function Download() {
         </div>
 
         {isLoading && (
-          <p className="text-xs text-gray-400 mt-2">Loading...</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Loading...</p>
         )}
         {noData && (
           <p className="text-xs text-red-500 mt-2">ETF "{confirmedTicker}" not found.</p>
         )}
         {hasNoDates && (
-          <p className="text-xs text-yellow-600 mt-2">No composition data available for {confirmedTicker}.</p>
+          <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">No composition data available for {confirmedTicker}.</p>
         )}
         {detail && (
-          <p className="text-xs text-green-600 mt-2 font-medium">
+          <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-medium">
             {detail.ticker} — {detail.name}
           </p>
         )}
@@ -88,7 +87,7 @@ export function Download() {
 
       {/* Date picker */}
       {detail && detail.available_dates.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm mb-4">
           <DatePickerCalendar
             label="Composition Date"
             value={selectedDate}
@@ -100,13 +99,13 @@ export function Download() {
 
       {/* Download buttons */}
       {ready && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-          <p className="text-xs font-medium text-gray-500 mb-3">Format</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Format</p>
           <div className="flex gap-2 flex-wrap">
             {([
               { format: 'xlsx', label: 'XLSX', style: 'bg-green-600 hover:bg-green-700' },
               { format: 'csv',  label: 'CSV',  style: 'bg-blue-600 hover:bg-blue-700' },
-              { format: 'json', label: 'JSON', style: 'bg-gray-700 hover:bg-gray-800' },
+              { format: 'json', label: 'JSON', style: 'bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500' },
             ] as const).map(({ format, label, style }) => (
               <button
                 key={format}
@@ -120,7 +119,7 @@ export function Download() {
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
             {confirmedTicker} · {selectedDate} · {detail.holdings_count.toLocaleString()} holdings
           </p>
         </div>

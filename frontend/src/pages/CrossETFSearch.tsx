@@ -18,8 +18,8 @@ export function CrossETFSearch() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Cross-ETF Search</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Cross-ETF Search</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Find all SSGA ETFs that hold a specific stock or component.
         </p>
       </div>
@@ -31,7 +31,7 @@ export function CrossETFSearch() {
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Enter component ticker, e.g. NVDA"
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 px-4 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <button
           type="submit"
@@ -46,30 +46,30 @@ export function CrossETFSearch() {
 
       {data && !isFetching && (
         <>
-          <div className="mb-3 text-sm text-gray-600">
+          <div className="mb-3 text-sm text-gray-600 dark:text-gray-400">
             {data.total_etfs > 0 ? (
               <>
-                <span className="font-semibold text-blue-700">{data.component_ticker}</span>
+                <span className="font-semibold text-blue-700 dark:text-blue-400">{data.component_ticker}</span>
                 {' is held by '}
-                <span className="font-semibold">{data.total_etfs}</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{data.total_etfs}</span>
                 {' SSGA ETFs (latest composition date per ETF)'}
               </>
             ) : (
               <>
                 No SSGA ETFs hold{' '}
-                <span className="font-semibold">{data.component_ticker}</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{data.component_ticker}</span>
                 {' in their latest compositions.'}
               </>
             )}
           </div>
 
           {data.total_etfs > 0 && (
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
               <table className="min-w-full text-sm">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                   <tr>
                     {['ETF', 'Fund Name', 'Weight', 'Sector', 'Shares Held', 'As of Date'].map(h => (
-                      <th key={h} className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap">
+                      <th key={h} className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
                         {h}
                       </th>
                     ))}
@@ -77,23 +77,23 @@ export function CrossETFSearch() {
                 </thead>
                 <tbody>
                   {data.found_in.map((r, i) => (
-                    <tr key={i} className={`border-b last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <tr key={i} className={`border-b border-gray-100 dark:border-gray-700 last:border-0 ${i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
                       <td className="px-4 py-2 font-semibold">
                         <Link to={`/etfs/${r.etf_ticker}`} className="text-blue-600 hover:underline">
                           {r.etf_ticker}
                         </Link>
                       </td>
-                      <td className="px-4 py-2 text-gray-700">
+                      <td className="px-4 py-2 text-gray-700 dark:text-gray-300">
                         {r.etf_name ?? '—'}
                       </td>
-                      <td className="px-4 py-2 font-medium text-gray-900">
+                      <td className="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">
                         {r.component_weight != null ? `${r.component_weight.toFixed(4)}%` : '—'}
                       </td>
-                      <td className="px-4 py-2 text-gray-500 text-xs">{r.component_sector ?? '—'}</td>
-                      <td className="px-4 py-2 text-gray-700">
+                      <td className="px-4 py-2 text-gray-500 dark:text-gray-400 text-xs">{r.component_sector ?? '—'}</td>
+                      <td className="px-4 py-2 text-gray-700 dark:text-gray-300">
                         {r.component_shares != null ? r.component_shares.toLocaleString() : '—'}
                       </td>
-                      <td className="px-4 py-2 text-gray-400 text-xs">{r.composition_date}</td>
+                      <td className="px-4 py-2 text-gray-400 dark:text-gray-500 text-xs">{r.composition_date}</td>
                     </tr>
                   ))}
                 </tbody>

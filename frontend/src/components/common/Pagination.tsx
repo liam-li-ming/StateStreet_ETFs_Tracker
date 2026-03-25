@@ -11,17 +11,17 @@ export function Pagination({ page, totalPages, onPage }: Props) {
       <button
         onClick={() => onPage(page - 1)}
         disabled={page === 1}
-        className="rounded border px-3 py-1 text-sm disabled:opacity-40 hover:bg-gray-100"
+        className="rounded border border-gray-300 dark:border-gray-600 px-3 py-1 text-sm text-gray-700 dark:text-gray-300 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700"
       >
         ← Prev
       </button>
-      <span className="text-sm text-gray-600">
+      <span className="text-sm text-gray-600 dark:text-gray-400">
         Page {page} of {totalPages}
       </span>
       <button
         onClick={() => onPage(page + 1)}
         disabled={page === totalPages}
-        className="rounded border px-3 py-1 text-sm disabled:opacity-40 hover:bg-gray-100"
+        className="rounded border border-gray-300 dark:border-gray-600 px-3 py-1 text-sm text-gray-700 dark:text-gray-300 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700"
       >
         Next →
       </button>
