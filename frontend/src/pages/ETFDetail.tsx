@@ -7,6 +7,7 @@ import { Top10BarChart } from '../components/etf/Top10BarChart'
 import { HoldingsTable } from '../components/etf/HoldingsTable'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { ErrorMessage } from '../components/common/ErrorMessage'
+import { DatePickerCalendar } from '../components/common/DatePickerCalendar'
 
 export function ETFDetail() {
   const { ticker = '' } = useParams()
@@ -65,17 +66,14 @@ export function ETFDetail() {
       {/* Date picker */}
       {detail.available_dates.length > 0 && (
         <div className="mb-4 flex items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">Composition date:</label>
-          <select
+          <span className="text-sm font-medium text-gray-700">Composition date:</span>
+          <DatePickerCalendar
+            label=""
             value={activeDate}
-            onChange={e => setSelectedDate(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            {detail.available_dates.map(d => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-          <span className="text-xs text-gray-400">
+            onChange={setSelectedDate}
+            availableDates={detail.available_dates}
+          />
+          <span className="text-xs text-gray-400 self-end mb-2">
             {detail.holdings_count.toLocaleString()} holdings
           </span>
         </div>

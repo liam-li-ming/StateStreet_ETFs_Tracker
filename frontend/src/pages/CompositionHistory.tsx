@@ -5,12 +5,7 @@ import { useCompare } from '../hooks/useCompositions'
 import { DiffTable } from '../components/comparison/DiffTable'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { ErrorMessage } from '../components/common/ErrorMessage'
-
-function fmt(v: unknown) {
-  if (v == null) return '—'
-  const n = Number(v)
-  return isNaN(n) ? String(v) : `${n.toFixed(4)}%`
-}
+import { DatePickerCalendar } from '../components/common/DatePickerCalendar'
 
 function fmtShares(v: unknown) {
   if (v == null) return '—'
@@ -65,27 +60,19 @@ export function CompositionHistory() {
         <>
           {/* Date selectors */}
           <div className="flex items-center gap-4 mb-6 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">From date</label>
-              <select
-                value={d1}
-                onChange={e => setDate1(e.target.value)}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                {dates.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </div>
+            <DatePickerCalendar
+              label="From date"
+              value={d1}
+              onChange={setDate1}
+              availableDates={dates}
+            />
             <span className="text-gray-400 mt-5">→</span>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">To date</label>
-              <select
-                value={d2}
-                onChange={e => setDate2(e.target.value)}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                {dates.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </div>
+            <DatePickerCalendar
+              label="To date"
+              value={d2}
+              onChange={setDate2}
+              availableDates={dates}
+            />
           </div>
 
           {comparing && <LoadingSpinner />}
