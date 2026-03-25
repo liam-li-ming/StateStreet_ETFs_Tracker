@@ -4,6 +4,7 @@ const links = [
   { to: '/', label: 'Directory' },
   { to: '/alerts', label: 'Alerts' },
   { to: '/search', label: 'Search' },
+  { to: '/download', label: 'Download' },
 ]
 
 export function Navbar() {

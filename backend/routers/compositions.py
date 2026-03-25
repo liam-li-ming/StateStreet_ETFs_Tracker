@@ -1,4 +1,11 @@
+import csv
+import io
+import json
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import StreamingResponse
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
 from backend.database import get_db
 from backend.schemas.composition import CompositionResponse, HoldingItem
 from backend.schemas.comparison import (
@@ -239,6 +246,199 @@ def _compute_changes_for_pair(conn, ticker: str, date_from: str, date_to: str) -
         })
 
     return changes
+
+
+def _build_xlsx(ticker: str, date: str, info: dict, comp_meta: dict, holdings: list[dict]) -> StreamingResponse:
+    wb = Workbook()
+
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill("solid", fgColor="1D4ED8")
+    center = Alignment(horizontal="center")
+
+    # Sheet 1: ETF Info
+    ws1 = wb.active
+    ws1.title = "ETF Info"
+    ws1.append(["Field", "Value"])
+    for cell in ws1[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+    for row in [
+        ("Ticker", ticker),
+        ("Name", info.get("name") or ""),
+        ("Composition Date", date),
+        ("NAV", info.get("nav") or ""),
+        ("AUM", info.get("aum") or ""),
+        ("Expense Ratio", info.get("gross_expense_ratio") or ""),
+        ("Domicile", info.get("domicile") or ""),
+        ("Shares Outstanding", comp_meta.get("shares_outstanding") or ""),
+        ("Total Net Assets", comp_meta.get("total_net_assets") or ""),
+    ]:
+        ws1.append(list(row))
+    ws1.column_dimensions["A"].width = 22
+    ws1.column_dimensions["B"].width = 42
+
+    # Sheet 2: Holdings
+    ws2 = wb.create_sheet("Holdings")
+    headers = ["Ticker", "Name", "SEDOL", "Identifier", "Weight (%)", "Shares", "Sector", "Currency"]
+    ws2.append(headers)
+    for i, _ in enumerate(headers, 1):
+        cell = ws2.cell(row=1, column=i)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+
+    for h in holdings:
+        ws2.append([
+            h.get("component_ticker") or "",
+            h.get("component_name") or "",
+            h.get("component_sedol") or "",
+            h.get("component_identifier") or "",
+            h.get("component_weight"),
+            h.get("component_shares"),
+            h.get("component_sector") or "",
+            h.get("component_currency") or "",
+        ])
+
+    for row in ws2.iter_rows(min_row=2, min_col=5, max_col=5):
+        for cell in row:
+            if cell.value is not None:
+                cell.number_format = "0.0000"
+
+    for i, w in enumerate([10, 42, 12, 22, 12, 16, 28, 12], 1):
+        ws2.column_dimensions[get_column_letter(i)].width = w
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    filename = f"{ticker}_{date}_composition.xlsx"
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+def _build_csv(ticker: str, date: str, info: dict, comp_meta: dict, holdings: list[dict]) -> StreamingResponse:
+    buf = io.StringIO()
+    buf.write('\ufeff')  # UTF-8 BOM so Excel auto-detects encoding
+    writer = csv.writer(buf)
+
+    # Metadata section
+    writer.writerow(["Field", "Value"])
+    for row in [
+        ("Ticker", ticker),
+        ("Name", info.get("name") or ""),
+        ("Composition Date", date),
+        ("NAV", info.get("nav") or ""),
+        ("AUM", info.get("aum") or ""),
+        ("Expense Ratio", info.get("gross_expense_ratio") or ""),
+        ("Domicile", info.get("domicile") or ""),
+        ("Shares Outstanding", comp_meta.get("shares_outstanding") or ""),
+        ("Total Net Assets", comp_meta.get("total_net_assets") or ""),
+    ]:
+        writer.writerow(list(row))
+
+    writer.writerow([])  # blank separator
+
+    # Holdings section
+    writer.writerow(["Ticker", "Name", "SEDOL", "Identifier", "Weight (%)", "Shares", "Sector", "Currency"])
+    for h in holdings:
+        writer.writerow([
+            h.get("component_ticker") or "",
+            h.get("component_name") or "",
+            h.get("component_sedol") or "",
+            h.get("component_identifier") or "",
+            h.get("component_weight"),
+            h.get("component_shares"),
+            h.get("component_sector") or "",
+            h.get("component_currency") or "",
+        ])
+
+    buf.seek(0)
+    filename = f"{ticker}_{date}_composition.csv"
+    return StreamingResponse(
+        iter([buf.getvalue()]),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+def _build_json(ticker: str, date: str, info: dict, comp_meta: dict, holdings: list[dict]) -> StreamingResponse:
+    payload = {
+        "ticker": ticker,
+        "name": info.get("name"),
+        "composition_date": date,
+        "nav": info.get("nav"),
+        "aum": info.get("aum"),
+        "expense_ratio": info.get("gross_expense_ratio"),
+        "domicile": info.get("domicile"),
+        "shares_outstanding": comp_meta.get("shares_outstanding"),
+        "total_net_assets": comp_meta.get("total_net_assets"),
+        "holdings_count": len(holdings),
+        "holdings": [
+            {
+                "ticker": h.get("component_ticker"),
+                "name": h.get("component_name"),
+                "sedol": h.get("component_sedol"),
+                "identifier": h.get("component_identifier"),
+                "weight_pct": h.get("component_weight"),
+                "shares": h.get("component_shares"),
+                "sector": h.get("component_sector"),
+                "currency": h.get("component_currency"),
+            }
+            for h in holdings
+        ],
+    }
+    filename = f"{ticker}_{date}_composition.json"
+    return StreamingResponse(
+        iter([json.dumps(payload, indent=2, ensure_ascii=False)]),
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/{ticker}/compositions/{date}/download")
+def download_composition(
+    ticker: str,
+    date: str,
+    format: str = Query(default="xlsx"),
+):
+    ticker = ticker.upper()
+    with get_db() as conn:
+        info = conn.execute(
+            "SELECT * FROM equity_etf_info WHERE ticker=?", (ticker,)
+        ).fetchone()
+        if not info:
+            raise HTTPException(status_code=404, detail=f"ETF '{ticker}' not found")
+
+        comp_meta = conn.execute(
+            "SELECT nav, shares_outstanding, total_net_assets "
+            "FROM equity_etf_compositions WHERE etf_ticker=? AND composition_date=? LIMIT 1",
+            (ticker, date),
+        ).fetchone()
+        if not comp_meta:
+            raise HTTPException(status_code=404, detail=f"No composition for {ticker} on {date}")
+
+        rows = conn.execute(
+            "SELECT component_ticker, component_name, component_identifier, component_sedol, "
+            "component_weight, component_shares, component_sector, component_currency "
+            "FROM equity_etf_compositions WHERE etf_ticker=? AND composition_date=? "
+            "ORDER BY component_weight DESC",
+            (ticker, date),
+        ).fetchall()
+
+    info_d = dict(info)
+    meta_d = dict(comp_meta)
+    holdings_d = [dict(r) for r in rows]
+
+    if format == "xlsx":
+        return _build_xlsx(ticker, date, info_d, meta_d, holdings_d)
+    if format == "csv":
+        return _build_csv(ticker, date, info_d, meta_d, holdings_d)
+    if format == "json":
+        return _build_json(ticker, date, info_d, meta_d, holdings_d)
+
+    raise HTTPException(status_code=400, detail=f"Unsupported format '{format}'. Supported: xlsx, csv, json")
 
 
 def populate_changes_cache(conn, ticker: str, date_from: str, date_to: str):
