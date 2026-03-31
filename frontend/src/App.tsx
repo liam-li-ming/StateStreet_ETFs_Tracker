@@ -8,6 +8,7 @@ import { CompositionHistory } from './pages/CompositionHistory'
 import { RebalancingAlerts } from './pages/RebalancingAlerts'
 import { CrossETFSearch } from './pages/CrossETFSearch'
 import { Download } from './pages/Download'
+import { ETFDividends } from './pages/ETFDividends'
 
 const queryClient = new QueryClient()
 
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/etfs/:ticker" element={<ETFDetail />} />
             <Route path="/etfs/:ticker/history" element={<CompositionHistory />} />
             <Route path="/alerts" element={<RebalancingAlerts />} />
+            <Route path="/dividends" element={<ETFDividends />} />
             <Route path="/search" element={<CrossETFSearch />} />
             <Route path="/download" element={<Download />} />
           </Route>

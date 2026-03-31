@@ -4,6 +4,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .retrievefromWEB_available_etfs import GetAvailableEtfs
 from .retrievefromWEB_etf_composition import GetEtfComposition
+from .insertintoDB_etf_dividends import create_dividends_table
 
 
 class EquityEtfCompositionDb:
@@ -95,6 +96,10 @@ class EquityEtfCompositionDb:
         """)
 
         self.conn.commit()
+
+        # Table 3: ETF-level dividend history (fetched via yfinance)
+        create_dividends_table(self.conn)
+
         print("Database Equity ETF tables created successfully.")
 
     def update_etf_info(self, etf_df):

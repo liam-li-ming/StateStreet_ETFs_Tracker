@@ -4,6 +4,7 @@ import { useThemeContext, type Theme } from '../../context/ThemeContext'
 const links = [
   { to: '/', label: 'Directory' },
   { to: '/alerts', label: 'Alerts' },
+  { to: '/dividends', label: 'Dividends' },
   { to: '/search', label: 'Search' },
   { to: '/download', label: 'Download' },
 ]

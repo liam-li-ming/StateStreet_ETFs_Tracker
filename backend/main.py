@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import ALLOWED_ORIGINS
 from backend.database import init_db
-from backend.routers import etfs, compositions, alerts, search, pipeline
+from backend.routers import etfs, compositions, alerts, search, pipeline, dividends
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ app.include_router(compositions.router)
 app.include_router(alerts.router)
 app.include_router(search.router)
 app.include_router(pipeline.router)
+app.include_router(dividends.router)
 
 
 @app.get("/")
