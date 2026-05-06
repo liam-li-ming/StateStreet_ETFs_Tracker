@@ -102,7 +102,7 @@ class GetEtfComposition:
                 navhist_df.columns = navhist_df.columns.str.strip()
 
                 # Convert Date column to YYYY-MM-DD string format to match composition_date
-                navhist_df['Date'] = pd.to_datetime(navhist_df['Date']).dt.strftime('%Y-%m-%d')
+                navhist_df['Date'] = pd.to_datetime(navhist_df['Date'], format='%d-%b-%Y').dt.strftime('%Y-%m-%d')
 
                 # Filter navhist_df for the row where Date == composition_date (from holdings file)
                 matched_row = navhist_df[navhist_df['Date'] == composition_date]
